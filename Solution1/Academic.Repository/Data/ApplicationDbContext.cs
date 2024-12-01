@@ -36,6 +36,7 @@ namespace Academic.Repository.Data
         public DbSet<User> Users { get; set; } // Corrected to Users
         public DbSet<PathTask> PathTasks { get; set; } // Corrected to PathTasks
         public DbSet<Quiz> Quizzes { get; set; } // Corrected to Quizzes
+        public DbSet<UserQuestionAnswer> userQuestionAnswers { get; set; }
          
     }
 }
