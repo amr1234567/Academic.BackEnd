@@ -21,6 +21,8 @@ namespace Academic.Core.Identitiy
         [MaxLength(50)]
         public string JobType { get; set; }
 
+        public bool IsLocked { get; set; }
+
         // Navigation Property
         public List<EducationalPath>? Paths { get; set; }
 

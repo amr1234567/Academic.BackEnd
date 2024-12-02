@@ -277,7 +277,7 @@ namespace Academic.Repository.Migrations
                     b.Property<int>("ModuleId")
                         .HasColumnType("int(8)");
 
-                    b.Property<int?>("QuizId")
+                    b.Property<int>("QuizId")
                         .HasColumnType("int(8)");
 
                     b.Property<string>("Title")
@@ -289,7 +289,8 @@ namespace Academic.Repository.Migrations
 
                     b.HasIndex("ModuleId");
 
-                    b.HasIndex("QuizId");
+                    b.HasIndex("QuizId")
+                        .IsUnique();
 
                     b.ToTable("ModuleSections");
                 });
@@ -326,12 +327,17 @@ namespace Academic.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(200)");
 
+                    b.Property<int>("InstructorId")
+                        .HasColumnType("int(8)");
+
                     b.Property<float>("Points")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("float(4,2)")
                         .HasDefaultValue(1f);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("InstructorId");
 
                     b.ToTable("MultiChoiceQuestions");
                 });
@@ -378,7 +384,7 @@ namespace Academic.Repository.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("SectionId")
-                        .HasColumnType("int(8)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -386,8 +392,6 @@ namespace Academic.Repository.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SectionId");
 
                     b.ToTable("Quizzes");
                 });
@@ -416,7 +420,7 @@ namespace Academic.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserQuestionAnswer");
+                    b.ToTable("userQuestionAnswers");
                 });
 
             modelBuilder.Entity("PathTaskQuestions", b =>
@@ -682,12 +686,24 @@ namespace Academic.Repository.Migrations
                         .IsRequired();
 
                     b.HasOne("Academic.Core.Entities.Quiz", "Quiz")
-                        .WithMany()
-                        .HasForeignKey("QuizId");
+                        .WithOne("Section")
+                        .HasForeignKey("Academic.Core.Entities.ModuleSection", "QuizId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Module");
 
                     b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("Academic.Core.Entities.MultiChoiceQuestion", b =>
+                {
+                    b.HasOne("Academic.Core.Identitiy.Instructor", "Instructor")
+                        .WithMany()
+                        .HasForeignKey("InstructorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Instructor");
                 });
 
             modelBuilder.Entity("Academic.Core.Entities.PathTask", b =>
@@ -699,17 +715,6 @@ namespace Academic.Repository.Migrations
                         .IsRequired();
 
                     b.Navigation("Path");
-                });
-
-            modelBuilder.Entity("Academic.Core.Entities.Quiz", b =>
-                {
-                    b.HasOne("Academic.Core.Entities.ModuleSection", "Section")
-                        .WithMany()
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Section");
                 });
 
             modelBuilder.Entity("Academic.Core.Entities.UserQuestionAnswer", b =>
@@ -801,6 +806,12 @@ namespace Academic.Repository.Migrations
             modelBuilder.Entity("Academic.Core.Entities.Module", b =>
                 {
                     b.Navigation("Sections");
+                });
+
+            modelBuilder.Entity("Academic.Core.Entities.Quiz", b =>
+                {
+                    b.Navigation("Section")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Academic.Core.Identitiy.Instructor", b =>

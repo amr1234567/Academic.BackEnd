@@ -24,8 +24,12 @@ namespace Academic.Repository.Data.Configurations
 
             builder.Property(m => m.Body).IsRequired()
                 .HasColumnType("LONGTEXT");  //for mysql data types
-           
-                
+
+            builder.HasOne(m => m.Quiz)
+            .WithOne(q => q.Section)
+            .HasForeignKey<ModuleSection>(m => m.QuizId)
+            .IsRequired(false) 
+            .OnDelete(DeleteBehavior.Restrict);
 
         }
     }

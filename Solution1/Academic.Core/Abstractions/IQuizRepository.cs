@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Academic.Core.Abstractions
 {
-    internal interface IQuizRepository
+    public interface IQuizRepository
     {
         Task<int> GenerateNewQuizToSection(Quiz quiz);
-        Task<Quiz> UpdateQuizToSection(Quiz quiz);
+        Task<int> UpdateQuizToSection(Quiz quiz);
         Task<Quiz> EmptyQuizFromQuestions(int quizId);
-        Task<Quiz> GetQuizById(int quizId);
-        Task<Quiz> GetQuizBySectionId(int sectionId);
+        Task<Quiz?> GetQuizById(int quizId);
+        Task<Quiz?> GetQuizBySectionId(int sectionId);
         Task<int> AddQuestionsToSectionQuizBySectionId(int sectionId, params int[] questionId);
         Task<int> AddQuestionsToSectionQuizBySectionId(int sectionId, params MultiChoiceQuestion[] question);
         Task<int> AddQuestionsToSectionQuizByQuizId(int quizId, params int[] questionId);
