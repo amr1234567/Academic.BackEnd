@@ -21,6 +21,10 @@ namespace Academic.Core.Identitiy
         [MaxLength(50)]
         public string JobType { get; set; }
 
+        // Added new 
+        //public bool IsBlocked { get; set; } = false;
+        public bool IsActive { get; set; }  
+
         // Navigation Property
         public List<EducationalPath>? Paths { get; set; }
 

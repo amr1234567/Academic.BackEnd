@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Academic.Core.Abstractions
 {
-    internal interface IModuleRepository
+    public interface IModuleRepository
     {
         Task<int> GenerateModule(Module module);
         Task<Module> DeleteModule(int moduleId);

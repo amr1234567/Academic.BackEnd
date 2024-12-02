@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Academic.Core.Abstractions
 {
-    internal interface IPathRepository
+    public interface IPathRepository
     {
         Task<int> GenerateNewPath(EducationalPath path);
         Task<EducationalPath> DeletePath(int pathId);

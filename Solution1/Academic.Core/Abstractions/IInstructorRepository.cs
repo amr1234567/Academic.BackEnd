@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Academic.Core.Abstractions
 {
-    internal interface IInstructorRepository
+    public interface IInstructorRepository
     {
         Task<int> GenerateNewInstructor(Instructor instructor);
         Task<int> DeleteInstructor(int instructorId);
