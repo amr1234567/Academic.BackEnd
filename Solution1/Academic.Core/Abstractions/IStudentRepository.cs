@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Academic.Core.Abstractions
 {
-    internal interface IStudentRepository
+    public interface IStudentRepository
     {
+        Task<List<User>> GetTopInScore(int num);
         Task<int> RollInOrOutModule(int studentId, int moduleId, bool rollIn = true);
         Task<int> RollInOrOutPath(int studentId, int pathId, bool rollIn = true);
-        Task<User> UpdateDetails(User user);
-        Task<int> BlockUser(int userId);
+        Task<int> UpdateDetails(User user);
         
     }
 }

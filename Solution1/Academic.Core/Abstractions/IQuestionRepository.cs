@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Academic.Core.Abstractions
 {
-    internal interface IQuestionRepository
+    public interface IQuestionRepository
     {
         Task<int> GenerateNewQuestion(MultiChoiceQuestion question);
-        Task<MultiChoiceQuestion> UpdateQuestion(MultiChoiceQuestion question);
-        Task<MultiChoiceQuestion> DeleteQuestion(int questionId);
-        Task<MultiChoiceQuestion> GetQuestion(int questionId);
+        Task<int> UpdateQuestion(MultiChoiceQuestion question);
+        Task<int> DeleteQuestion(int questionId);
+        Task<MultiChoiceQuestion?> GetQuestion(int questionId);
         Task<List<MultiChoiceQuestion>> GetQuestionsForInstructor(int instructorId, int page = 1, int size = 30);
         Task<List<MultiChoiceQuestion>> GetQuestionsForInstructorBySearch(int instructorId, string searchText = "", int page = 1, int size = 30);
     }

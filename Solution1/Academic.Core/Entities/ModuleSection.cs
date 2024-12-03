@@ -22,7 +22,7 @@ namespace Academic.Core.Entities
         public string Body { get; set; }
 
         // 1 - 1
-        public int? QuizId { get; set; }
+        public int QuizId { get; set; }
         [ForeignKey(nameof(QuizId))]
         public Quiz Quiz { get; set; }
 

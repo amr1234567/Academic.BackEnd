@@ -39,6 +39,12 @@ namespace Academic.Repository.Data.Configurations
                    .IsRequired()
                    .HasDefaultValue(1)
                    .HasColumnType("float(4,2)");
+
+            builder.HasOne(q => q.Instructor)
+                .WithMany()
+                .HasForeignKey(q => q.InstructorId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 

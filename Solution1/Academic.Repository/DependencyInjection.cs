@@ -1,4 +1,5 @@
 ﻿using Academic.Repository.Data;
+using Academic.Repository.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,12 @@ namespace Academic.Repository
                 //options.UseSqlServer(connectionString);
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             });
+
+
+            services.AddScoped<IQuestionRepository, QuestionRepository>();
+            services.AddScoped<IQuizRepository, QuizRepository>();
+            services.AddScoped<IStudentRepository, StudentRepository>();
+            services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
 
             return services;
         }

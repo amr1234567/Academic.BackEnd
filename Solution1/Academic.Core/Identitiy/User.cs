@@ -19,6 +19,9 @@ namespace Academic.Core.Identitiy
         [Required]
         public string Country { get; set; }
 
+        public bool IsLocked { get; set; }
+
+
         [Required]
         public EducationStatus Education { get; set; }
 
