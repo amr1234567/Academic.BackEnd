@@ -28,6 +28,11 @@ namespace Academic.Repository
             services.AddScoped<IQuizRepository, QuizRepository>();
             services.AddScoped<IStudentRepository, StudentRepository>();
             services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
+            services.AddScoped<IModuleSectionsRepository, ModuleSectionsRepository>();
+            services.AddScoped<IAdminRepository, IAdminRepository>();
+            services.AddScoped<IInstructorRepository, InstructorRepository>();
+            services.AddScoped<IModuleRepository, ModuleRepository>();
+            services.AddScoped<IPathRepository, PathRepository>();
 
             return services;
         }
