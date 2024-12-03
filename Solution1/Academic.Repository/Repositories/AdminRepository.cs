@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Academic.Repository.Repositories
 {
-    public class AdminRepository
+    public class AdminRepository : IAdminRepository
     {
     }
 }

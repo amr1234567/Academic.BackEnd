@@ -29,7 +29,7 @@ namespace Academic.Repository
             services.AddScoped<IStudentRepository, StudentRepository>();
             services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
             services.AddScoped<IModuleSectionsRepository, ModuleSectionsRepository>();
-            services.AddScoped<IAdminRepository, IAdminRepository>();
+            services.AddScoped<IAdminRepository, AdminRepository>();
             services.AddScoped<IInstructorRepository, InstructorRepository>();
             services.AddScoped<IModuleRepository, ModuleRepository>();
             services.AddScoped<IPathRepository, PathRepository>();
