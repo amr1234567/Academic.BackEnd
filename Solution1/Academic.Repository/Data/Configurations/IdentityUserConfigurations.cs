@@ -1,4 +1,5 @@
 ﻿using Academic.Core.Base;
+using Academic.Core.Enums;
 using Academic.Core.Identitiy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -30,6 +31,17 @@ namespace Academic.Repository.Data.Configurations
 
             builder.Property(p => p.Phone).IsRequired()
                 .HasColumnType("varchar(20)");
+
+            builder.Property(p => p.RefreshToken).IsRequired(false)
+               .HasColumnType("varchar(100)");
+
+            builder.Property(p => p.RefreshTokenExpiredAt).IsRequired(false)
+              .HasColumnType("datetime");
+
+            builder.Property(u => u.Role).IsRequired().HasConversion(
+                       data => data.ToString(),
+                       data => (ApplicationRole)Enum.Parse(typeof(ApplicationRole), data))
+                .HasColumnType($"ENUM('{ApplicationRole.Admin.ToString()}','{ApplicationRole.Instructor.ToString()}','{ApplicationRole.Student.ToString()}')");
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Academic.Services.Models
+namespace Academic.Services.Models.Outputs
 {
     public class TokenModel
     {

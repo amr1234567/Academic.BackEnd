@@ -12,7 +12,8 @@ namespace Academic.API
             // Add services to the container.
 
             builder.Services.AddControllers();
-            builder.Services.AddRepositoryLayerServices(builder.Configuration);
+            builder.Services.AddRepositoryLayerServices(builder.Configuration)
+                .AddServicesLayesrServices(builder.Configuration);
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

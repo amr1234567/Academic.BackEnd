@@ -27,6 +27,8 @@ namespace Academic.Repository.Data.Configurations
                    .HasColumnType($"ENUM('{EducationalLevel.Secondary.ToString()}','{EducationalLevel.Preparatory.ToString()}','{EducationalLevel.Graduated.ToString()}','{EducationalLevel.Undergraduate.ToString()}')");
             });
 
+            
+
             builder.Property(u => u.Country).IsRequired()
                .HasColumnType("varchar(255)");
 

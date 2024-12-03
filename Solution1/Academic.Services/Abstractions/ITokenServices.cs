@@ -1,4 +1,4 @@
-﻿using Academic.Services.Models;
+﻿using Academic.Services.Models.Outputs;
 using System.Security.Claims;
 
 namespace Academic.Services.Abstractions
