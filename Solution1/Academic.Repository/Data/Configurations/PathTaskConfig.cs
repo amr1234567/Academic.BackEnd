@@ -47,10 +47,12 @@ namespace Academic.Repository.Data.Configurations
                        join.HasOne<PathTask>() // The `User` side of the relationship
                            .WithMany()
                            .IsRequired()
+                           .HasForeignKey("PathTaskId")
                            .OnDelete(DeleteBehavior.Restrict); // Restrict delete on Users
                        join.HasOne<MultiChoiceQuestion>() // The `Path` side of the relationship
                            .WithMany()
                            .IsRequired()
+                           .HasForeignKey("QuestionId")
                            .OnDelete(DeleteBehavior.Restrict);
                    });
         }

@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Academic.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241125202140_Initial")]
+    [Migration("20241203175000_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -126,14 +126,9 @@ namespace Academic.Repository.Migrations
                     b.Property<double>("ProgressPresented")
                         .HasColumnType("double");
 
-                    b.Property<int>("UsersId")
-                        .HasColumnType("int(8)");
-
                     b.HasKey("UserId", "ModuleSectionId");
 
                     b.HasIndex("ModuleSectionId");
-
-                    b.HasIndex("UsersId");
 
                     b.ToTable("ModuleSectionUsers", (string)null);
                 });
@@ -149,14 +144,9 @@ namespace Academic.Repository.Migrations
                     b.Property<double>("ProgressPresented")
                         .HasColumnType("double");
 
-                    b.Property<int>("UsersId")
-                        .HasColumnType("int(8)");
-
                     b.HasKey("UserId", "ModuleId");
 
                     b.HasIndex("ModuleId");
-
-                    b.HasIndex("UsersId");
 
                     b.ToTable("ModuleUsers", (string)null);
                 });
@@ -175,14 +165,9 @@ namespace Academic.Repository.Migrations
                     b.Property<double>("Score")
                         .HasColumnType("double");
 
-                    b.Property<int>("UsersId")
-                        .HasColumnType("int(8)");
-
                     b.HasKey("UserId", "PathTaskId");
 
                     b.HasIndex("PathTaskId");
-
-                    b.HasIndex("UsersId");
 
                     b.ToTable("PathTaskUsers", (string)null);
                 });
@@ -201,19 +186,9 @@ namespace Academic.Repository.Migrations
                     b.Property<int>("NumberOfCompletedModules")
                         .HasColumnType("int");
 
-                    b.Property<int>("PathsId")
-                        .HasColumnType("int(8)");
-
-                    b.Property<int>("UsersId")
-                        .HasColumnType("int(8)");
-
                     b.HasKey("UserId", "PathId");
 
                     b.HasIndex("PathId");
-
-                    b.HasIndex("PathsId");
-
-                    b.HasIndex("UsersId");
 
                     b.ToTable("PathUsers", (string)null);
                 });
@@ -280,7 +255,7 @@ namespace Academic.Repository.Migrations
                     b.Property<int>("ModuleId")
                         .HasColumnType("int(8)");
 
-                    b.Property<int?>("QuizId")
+                    b.Property<int>("QuizId")
                         .HasColumnType("int(8)");
 
                     b.Property<string>("Title")
@@ -292,7 +267,8 @@ namespace Academic.Repository.Migrations
 
                     b.HasIndex("ModuleId");
 
-                    b.HasIndex("QuizId");
+                    b.HasIndex("QuizId")
+                        .IsUnique();
 
                     b.ToTable("ModuleSections");
                 });
@@ -329,12 +305,17 @@ namespace Academic.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(200)");
 
+                    b.Property<int>("InstructorId")
+                        .HasColumnType("int(8)");
+
                     b.Property<float>("Points")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("float(4,2)")
                         .HasDefaultValue(1f);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("InstructorId");
 
                     b.ToTable("MultiChoiceQuestions");
                 });
@@ -381,7 +362,7 @@ namespace Academic.Repository.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("SectionId")
-                        .HasColumnType("int(8)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -390,9 +371,34 @@ namespace Academic.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SectionId");
-
                     b.ToTable("Quizzes");
+                });
+
+            modelBuilder.Entity("Academic.Core.Entities.UserQuestionAnswer", b =>
+                {
+                    b.Property<int>("QuizId")
+                        .HasColumnType("int(8)");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int(8)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int(8)");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("UserChoice")
+                        .IsRequired()
+                        .HasColumnType("varchar(1)");
+
+                    b.HasKey("QuizId", "QuestionId", "UserId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("userQuestionAnswers");
                 });
 
             modelBuilder.Entity("PathTaskQuestions", b =>
@@ -403,17 +409,12 @@ namespace Academic.Repository.Migrations
                     b.Property<int>("QuestionsId")
                         .HasColumnType("int(8)");
 
-                    b.Property<int>("MultiChoiceQuestionId")
-                        .HasColumnType("int(8)");
-
-                    b.Property<int>("PathTaskId1")
+                    b.Property<int>("QuestionId")
                         .HasColumnType("int(8)");
 
                     b.HasKey("PathTaskId", "QuestionsId");
 
-                    b.HasIndex("MultiChoiceQuestionId");
-
-                    b.HasIndex("PathTaskId1");
+                    b.HasIndex("QuestionId");
 
                     b.HasIndex("QuestionsId");
 
@@ -425,18 +426,18 @@ namespace Academic.Repository.Migrations
                     b.Property<int>("QuestionsId")
                         .HasColumnType("int(8)");
 
-                    b.Property<int>("QuizId")
-                        .HasColumnType("int(8)");
-
-                    b.Property<int>("MultiChoiceQuestionId")
-                        .HasColumnType("int(8)");
-
                     b.Property<int>("QuizId1")
                         .HasColumnType("int(8)");
 
-                    b.HasKey("QuestionsId", "QuizId");
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int(8)");
 
-                    b.HasIndex("MultiChoiceQuestionId");
+                    b.Property<int>("QuizId")
+                        .HasColumnType("int(8)");
+
+                    b.HasKey("QuestionsId", "QuizId1");
+
+                    b.HasIndex("QuestionId");
 
                     b.HasIndex("QuizId");
 
@@ -464,6 +465,9 @@ namespace Academic.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("JobType")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -485,6 +489,9 @@ namespace Academic.Repository.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<float>("Points")
                         .ValueGeneratedOnAdd()
@@ -540,12 +547,6 @@ namespace Academic.Repository.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Academic.Core.Identitiy.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("ModuleSection");
 
                     b.Navigation("User");
@@ -563,12 +564,6 @@ namespace Academic.Repository.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Academic.Core.Identitiy.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Module");
@@ -590,12 +585,6 @@ namespace Academic.Repository.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Academic.Core.Identitiy.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("PathTask");
 
                     b.Navigation("User");
@@ -609,22 +598,10 @@ namespace Academic.Repository.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Academic.Core.Entities.EducationalPath", null)
-                        .WithMany()
-                        .HasForeignKey("PathsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Academic.Core.Identitiy.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Academic.Core.Identitiy.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Path");
@@ -658,12 +635,24 @@ namespace Academic.Repository.Migrations
                         .IsRequired();
 
                     b.HasOne("Academic.Core.Entities.Quiz", "Quiz")
-                        .WithMany()
-                        .HasForeignKey("QuizId");
+                        .WithOne("Section")
+                        .HasForeignKey("Academic.Core.Entities.ModuleSection", "QuizId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Module");
 
                     b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("Academic.Core.Entities.MultiChoiceQuestion", b =>
+                {
+                    b.HasOne("Academic.Core.Identitiy.Instructor", "Instructor")
+                        .WithMany()
+                        .HasForeignKey("InstructorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Instructor");
                 });
 
             modelBuilder.Entity("Academic.Core.Entities.PathTask", b =>
@@ -677,34 +666,44 @@ namespace Academic.Repository.Migrations
                     b.Navigation("Path");
                 });
 
-            modelBuilder.Entity("Academic.Core.Entities.Quiz", b =>
+            modelBuilder.Entity("Academic.Core.Entities.UserQuestionAnswer", b =>
                 {
-                    b.HasOne("Academic.Core.Entities.ModuleSection", "Section")
+                    b.HasOne("Academic.Core.Entities.MultiChoiceQuestion", "Question")
                         .WithMany()
-                        .HasForeignKey("SectionId")
+                        .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Section");
+                    b.HasOne("Academic.Core.Entities.Quiz", "Quiz")
+                        .WithMany()
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Academic.Core.Identitiy.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("Quiz");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PathTaskQuestions", b =>
                 {
-                    b.HasOne("Academic.Core.Entities.MultiChoiceQuestion", null)
-                        .WithMany()
-                        .HasForeignKey("MultiChoiceQuestionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Academic.Core.Entities.PathTask", null)
                         .WithMany()
                         .HasForeignKey("PathTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Academic.Core.Entities.PathTask", null)
+                    b.HasOne("Academic.Core.Entities.MultiChoiceQuestion", null)
                         .WithMany()
-                        .HasForeignKey("PathTaskId1")
+                        .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -717,9 +716,9 @@ namespace Academic.Repository.Migrations
 
             modelBuilder.Entity("QuizQuestions", b =>
                 {
-                    b.HasOne("Academic.Core.Entities.MultiChoiceQuestion", null)
+                    b.HasOne("Academic.Core.Entities.Quiz", null)
                         .WithMany()
-                        .HasForeignKey("MultiChoiceQuestionId")
+                        .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -729,16 +728,16 @@ namespace Academic.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Academic.Core.Entities.Quiz", null)
+                    b.HasOne("Academic.Core.Entities.MultiChoiceQuestion", null)
                         .WithMany()
                         .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Academic.Core.Entities.Quiz", null)
                         .WithMany()
                         .HasForeignKey("QuizId1")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -750,6 +749,12 @@ namespace Academic.Repository.Migrations
             modelBuilder.Entity("Academic.Core.Entities.Module", b =>
                 {
                     b.Navigation("Sections");
+                });
+
+            modelBuilder.Entity("Academic.Core.Entities.Quiz", b =>
+                {
+                    b.Navigation("Section")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Academic.Core.Identitiy.Instructor", b =>

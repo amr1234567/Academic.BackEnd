@@ -12,5 +12,7 @@ namespace Academic.Services.Abstractions
     {
         Task<IdentityUser> GetUserData(int userId);
         Task<TokenModel> SignIn(string email, string password);
+        Task<int> SignOut(string email);
+        Task<int> SignOut(int Id);
     }
 }

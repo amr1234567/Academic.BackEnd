@@ -406,17 +406,12 @@ namespace Academic.Repository.Migrations
                     b.Property<int>("QuestionsId")
                         .HasColumnType("int(8)");
 
-                    b.Property<int>("MultiChoiceQuestionId")
-                        .HasColumnType("int(8)");
-
-                    b.Property<int>("PathTaskId1")
+                    b.Property<int>("QuestionId")
                         .HasColumnType("int(8)");
 
                     b.HasKey("PathTaskId", "QuestionsId");
 
-                    b.HasIndex("MultiChoiceQuestionId");
-
-                    b.HasIndex("PathTaskId1");
+                    b.HasIndex("QuestionId");
 
                     b.HasIndex("QuestionsId");
 
@@ -428,18 +423,18 @@ namespace Academic.Repository.Migrations
                     b.Property<int>("QuestionsId")
                         .HasColumnType("int(8)");
 
-                    b.Property<int>("QuizId")
-                        .HasColumnType("int(8)");
-
-                    b.Property<int>("MultiChoiceQuestionId")
-                        .HasColumnType("int(8)");
-
                     b.Property<int>("QuizId1")
                         .HasColumnType("int(8)");
 
-                    b.HasKey("QuestionsId", "QuizId");
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int(8)");
 
-                    b.HasIndex("MultiChoiceQuestionId");
+                    b.Property<int>("QuizId")
+                        .HasColumnType("int(8)");
+
+                    b.HasKey("QuestionsId", "QuizId1");
+
+                    b.HasIndex("QuestionId");
 
                     b.HasIndex("QuizId");
 
@@ -697,21 +692,15 @@ namespace Academic.Repository.Migrations
 
             modelBuilder.Entity("PathTaskQuestions", b =>
                 {
-                    b.HasOne("Academic.Core.Entities.MultiChoiceQuestion", null)
-                        .WithMany()
-                        .HasForeignKey("MultiChoiceQuestionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Academic.Core.Entities.PathTask", null)
                         .WithMany()
                         .HasForeignKey("PathTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Academic.Core.Entities.PathTask", null)
+                    b.HasOne("Academic.Core.Entities.MultiChoiceQuestion", null)
                         .WithMany()
-                        .HasForeignKey("PathTaskId1")
+                        .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -724,9 +713,9 @@ namespace Academic.Repository.Migrations
 
             modelBuilder.Entity("QuizQuestions", b =>
                 {
-                    b.HasOne("Academic.Core.Entities.MultiChoiceQuestion", null)
+                    b.HasOne("Academic.Core.Entities.Quiz", null)
                         .WithMany()
-                        .HasForeignKey("MultiChoiceQuestionId")
+                        .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -736,16 +725,16 @@ namespace Academic.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Academic.Core.Entities.Quiz", null)
+                    b.HasOne("Academic.Core.Entities.MultiChoiceQuestion", null)
                         .WithMany()
                         .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Academic.Core.Entities.Quiz", null)
                         .WithMany()
                         .HasForeignKey("QuizId1")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
