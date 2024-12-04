@@ -1,5 +1,7 @@
-﻿using Academic.Services.Abstractions;
+﻿using Academic.Repository.Repositories;
+using Academic.Services.Abstractions;
 using Academic.Services.Models.Outputs;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,29 +12,56 @@ namespace Academic.Services.Services
 {
     public class ModuleServices : IModuleServices
     {
-        public Task<List<ModuleDto>> GetAllModules(int page = 1, int size = 10)
+        private readonly ModuleRepository _moduleRepository;
+        private readonly ModuleSectionsRepository _moduleSectionsRepository;
+        private readonly IMapper _mapper;
+
+        public ModuleServices(ModuleRepository moduleRepository, ModuleSectionsRepository moduleSectionsRepository
+            , IMapper mapper)
         {
-            throw new NotImplementedException();
+            this._moduleRepository = moduleRepository;
+            this._moduleSectionsRepository = moduleSectionsRepository;
+            this._mapper = mapper;
+        }
+        public async Task<List<ModuleDto>> GetAllModules(int page = 1, int size = 10)
+        {
+            // get modules using ModuleRepository
+            var modules = await _moduleRepository.GetModules(page, size);
+
+            return _mapper.Map<List<ModuleDto>>(modules);
         }
 
-        public Task<List<ModuleDto>> GetAllModulesInPath(int pathId, int page = 1, int size = 10)
+        public async Task<List<ModuleDto>> GetAllModulesInPath(int pathId, int page = 1, int size = 10)
         {
-            throw new NotImplementedException();
+            var modulePath = await _moduleRepository.GetModulesInPath(pathId, page, size);
+
+            return _mapper.Map<List<ModuleDto>>(modulePath);
         }
 
-        public Task<ModuleDto> GetModuleById(int moduleId)
+        public async Task<ModuleDto> GetModuleById(int moduleId)
         {
-            throw new NotImplementedException();
+            var module = await _moduleRepository.GetModule(moduleId);
+
+            if(module != null)
+                return _mapper.Map<ModuleDto>(module);
+
+            return null;
         }
 
-        public Task<ModuleSectionDto> GetSectionById(int sectionId)
+        public async Task<ModuleSectionDto> GetSectionById(int sectionId)
         {
-            throw new NotImplementedException();
+             var modelSection = await _moduleSectionsRepository.GetModuleSectionById(sectionId);
+
+            return _mapper.Map<ModuleSectionDto>(modelSection);
         }
 
-        public Task<List<ModuleSectionDto>> GetSectionsInModule(int moduleId, int page = 1, int size = 10)
+        public async Task<List<ModuleSectionDto>> GetSectionsInModule(int moduleId, int page = 1, int size = 10)
         {
-            throw new NotImplementedException();
+            var modelSections = await _moduleSectionsRepository
+                .GetModuleSectionsInModule(moduleId, page, size);
+
+            return _mapper.Map<List<ModuleSectionDto>>(modelSections);
+
         }
     }
 }

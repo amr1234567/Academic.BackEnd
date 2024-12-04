@@ -1,6 +1,8 @@
-﻿using Academic.Services.Abstractions;
+﻿using Academic.Repository.Repositories;
+using Academic.Services.Abstractions;
 using Academic.Services.Models.Inputs;
 using Academic.Services.Models.Outputs;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +13,29 @@ namespace Academic.Services.Services
 {
     public class PathServices : IPathServices
     {
-        public Task<List<PathDto>> GetAllPaths(int page = 1, int size = 10)
+        private readonly PathRepository _pathRepository;
+        private readonly IMapper _mapper;
+
+        public PathServices(PathRepository pathRepository,IMapper mapper)
         {
-            throw new NotImplementedException();
+            this._pathRepository = pathRepository;
+            this._mapper = mapper;
+        }
+        public async Task<List<PathDto>> GetAllPaths(int page = 1, int size = 10)
+        {
+            var paths = await _pathRepository.GetPaths(page, size);
+
+            return _mapper.Map<List<PathDto>>(paths);
         }
 
-        public Task<PathDto> GetPathById(int id)
+        public async Task<PathDto> GetPathById(int id)
         {
-            throw new NotImplementedException();
+            var path = await _pathRepository.GetPath(id);
+
+            if(path != null) 
+                 return _mapper.Map<PathDto>(path);
+
+            return null;
         }
 
         public Task<PathTaskModel> GetPathTask(int pathId)
