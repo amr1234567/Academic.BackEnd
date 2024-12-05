@@ -33,6 +33,9 @@ namespace Academic.Repository
             services.AddScoped<IInstructorRepository, InstructorRepository>();
             services.AddScoped<IModuleRepository, ModuleRepository>();
             services.AddScoped<IPathRepository, PathRepository>();
+            services.AddScoped<IPathTasksRepository, PathTasksRepository>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }

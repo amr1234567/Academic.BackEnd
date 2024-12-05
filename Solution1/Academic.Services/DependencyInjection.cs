@@ -1,19 +1,12 @@
 ﻿using Academic.Core.Helpers;
-using Academic.Repository.Data;
-using Academic.Repository.Repositories;
 using Academic.Services.Abstractions;
 using Academic.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Academic.Repository
 {

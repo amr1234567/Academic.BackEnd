@@ -1,4 +1,6 @@
-﻿using Academic.Repository.Repositories;
+﻿using Academic.Core.Abstractions;
+using Academic.Core.Exceptions;
+using Academic.Repository.Repositories;
 using Academic.Services.Abstractions;
 using Academic.Services.Models.Inputs;
 using Academic.Services.Models.Outputs;
@@ -13,10 +15,10 @@ namespace Academic.Services.Services
 {
     public class PathServices : IPathServices
     {
-        private readonly PathRepository _pathRepository;
+        private readonly IPathRepository _pathRepository;
         private readonly IMapper _mapper;
 
-        public PathServices(PathRepository pathRepository,IMapper mapper)
+        public PathServices(IPathRepository pathRepository,IPathTasksRepository pathTasksRepository, IMapper mapper)
         {
             this._pathRepository = pathRepository;
             this._mapper = mapper;
@@ -35,7 +37,7 @@ namespace Academic.Services.Services
             if(path != null) 
                  return _mapper.Map<PathDto>(path);
 
-            return null;
+            throw new EntityNotFoundException(typeof(Path), id);
         }
 
         public Task<PathTaskModel> GetPathTask(int pathId)

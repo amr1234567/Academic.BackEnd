@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Academic.Core.Abstractions
 {
-    internal interface IPathTasksRepository
+    public interface IPathTasksRepository
     {
         Task<PathTask> GenerateTaskForPath(PathTask path);
         Task<PathTask> UpdateTask(PathTask path);
