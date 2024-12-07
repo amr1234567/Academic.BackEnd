@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Academic.Repository.Repositories
 {
-    internal class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
+    public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
     {
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

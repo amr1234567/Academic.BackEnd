@@ -11,8 +11,8 @@ namespace Academic.Core.Abstractions
     {
         Task<PathTask> GenerateTaskForPath(PathTask path);
         Task<PathTask> UpdateTask(PathTask path);
-        Task<PathTask> GetTaskForPathByPathId(int pathId);
         Task<PathTask> DeleteTask(int pathId);
+        Task<PathTask> GetTaskForPathByPathId(int pathId);
         Task<PathTask> GetTaskForPathById(int taskId);
         Task<List<PathTask>> GetPathTasks(int page = 1, int size = 10);
 

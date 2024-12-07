@@ -1,4 +1,5 @@
-﻿using Academic.Repository.Repositories;
+﻿using Academic.Core.Abstractions;
+using Academic.Repository.Repositories;
 using Academic.Services.Abstractions;
 using Academic.Services.Models.Outputs;
 using AutoMapper;
@@ -12,11 +13,11 @@ namespace Academic.Services.Services
 {
     public class ModuleServices : IModuleServices
     {
-        private readonly ModuleRepository _moduleRepository;
-        private readonly ModuleSectionsRepository _moduleSectionsRepository;
+        private readonly IModuleRepository _moduleRepository;
+        private readonly IModuleSectionsRepository _moduleSectionsRepository;
         private readonly IMapper _mapper;
 
-        public ModuleServices(ModuleRepository moduleRepository, ModuleSectionsRepository moduleSectionsRepository
+        public ModuleServices(IModuleRepository moduleRepository, IModuleSectionsRepository moduleSectionsRepository
             , IMapper mapper)
         {
             this._moduleRepository = moduleRepository;

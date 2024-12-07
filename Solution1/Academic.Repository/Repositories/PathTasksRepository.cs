@@ -1,56 +1,170 @@
-﻿using System;
+﻿using Academic.Core.Entities;
+using Academic.Core.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Academic.Repository.Repositories
 {
     public class PathTasksRepository : IPathTasksRepository
     {
-        public Task<int> AddQuestionsToTask(int taskId, params int[] questionId)
+        private readonly ApplicationDbContext _context;
+
+        public PathTasksRepository(ApplicationDbContext context)
         {
-            throw new NotImplementedException();
+            this._context = context;
         }
 
-        public Task<int> AddQuestionsToTask(int taskId, params MultiChoiceQuestion[] question)
+        
+        public async Task<PathTask> GenerateTaskForPath(PathTask path)
         {
-            throw new NotImplementedException();
+            await _context.PathTasks.AddAsync(path);
+            await _context.SaveChangesAsync();
+            return path;
         }
 
-        public Task<PathTask> DeleteTask(int pathId)
+        public async Task<PathTask> UpdateTask(PathTask path)
         {
-            throw new NotImplementedException();
+            _context.PathTasks.Update(path);
+            await _context.SaveChangesAsync();
+            return path;
         }
 
-        public Task<PathTask> GenerateTaskForPath(PathTask path)
+        public async Task<PathTask> DeleteTask(int pathId)
         {
-            throw new NotImplementedException();
+            var task = await _context.PathTasks.FirstOrDefaultAsync(t => t.PathId == pathId);
+
+            _context.PathTasks.Remove(task);
+            await _context.SaveChangesAsync();
+            return task;
         }
 
-        public Task<List<PathTask>> GetPathTasks(int page = 1, int size = 10)
+        public async Task<PathTask> GetTaskForPathByPathId(int pathId)
         {
-            throw new NotImplementedException();
+            var task = await _context.PathTasks
+                .FirstOrDefaultAsync(t => t.PathId == pathId);
+
+            if(task != null)
+                return task;
+
+            return null;
         }
 
-        public Task<PathTask> GetTaskForPathById(int taskId)
+        public async Task<PathTask> GetTaskForPathById(int taskId)
         {
-            throw new NotImplementedException();
+            var task = await _context.PathTasks
+                .FirstOrDefaultAsync(t => t.PathId == taskId);
+
+            if (task != null)
+                return task;
+
+            return null;
         }
 
-        public Task<PathTask> GetTaskForPathByPathId(int pathId)
+        public async Task<List<PathTask>> GetPathTasks(int page = 1, int size = 10)
         {
-            throw new NotImplementedException();
+            return await _context.PathTasks
+                .Skip((page - 1) * size)
+                .Take(size)
+                .ToListAsync();
         }
 
-        public Task<int> RemoveQuestionsFromTask(int taskId, params int[] questionId)
+        public async Task<int> AddQuestionsToTask(int taskId, params int[] questionId)
         {
-            throw new NotImplementedException();
+            if (questionId == null)
+            {
+                throw new ArgumentException("No questionIds Added");
+            }
+
+            var task = await _context.PathTasks
+                .Include(t => t.Questions)
+                .FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if (task == null)
+            {
+                throw new ArgumentException("Task not found.");
+            }
+
+            var questions = await _context.MultiChoiceQuestions
+                .Where(q => questionId.Contains(q.Id))
+                .ToListAsync();
+
+            int addedCount = 0;
+            foreach (var question in questions)
+            {
+                if (!task.Questions.Contains(question))
+                {
+                    task.Questions.Add(question);
+                    addedCount++;
+                }
+            }
+
+            return addedCount;
         }
 
-        public Task<PathTask> UpdateTask(PathTask path)
+        public async Task<int> AddQuestionsToTask(int taskId, params MultiChoiceQuestion[] questions)
         {
-            throw new NotImplementedException();
+            if (questions == null )
+            {
+                throw new ArgumentException("No questions Added");
+            }
+
+            var task = await _context.PathTasks
+                .Include(t => t.Questions)
+                .FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if (task == null)
+            {
+                throw new ArgumentException("Task not found.");
+            }
+
+            int addedCount = 0;
+            foreach (var question in questions)
+            {
+                if (!task.Questions.Contains(question))
+                {
+                    task.Questions.Add(question);
+                    addedCount++;
+                }
+            }
+
+            return addedCount;
+        }
+
+        public async Task<int> RemoveQuestionsFromTask(int taskId, params int[] questionId)
+        {
+            if (questionId == null )
+            {
+                throw new ArgumentException("No questionIds Added");
+            }
+
+            var task = await _context.PathTasks
+                .Include(t => t.Questions)
+                .FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if (task == null)
+            {
+                throw new ArgumentException("Task not found.");
+            }
+
+            var questions = await _context.MultiChoiceQuestions
+                .Where(q => questionId.Contains(q.Id))
+                .ToListAsync();
+
+            int removedCount = 0;
+            foreach (var question in questions)
+            {
+                if (task.Questions.Contains(question))
+                {
+                    task.Questions.Remove(question);
+                    removedCount++;
+                }
+            }
+
+            return removedCount;
         }
     }
 }
