@@ -1,8 +1,7 @@
-﻿
-namespace Academic.Services.Services
+﻿namespace Academic.Core.Exceptions
 {
     [Serializable]
-    internal class BadRequestExecption : Exception
+    public class BadRequestExecption : Exception
     {
         public BadRequestExecption()
         {

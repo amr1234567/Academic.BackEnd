@@ -1,6 +1,9 @@
-﻿using Academic.Services.Abstractions;
+﻿using Academic.Core.Entities;
+using Academic.Core.Errors;
+using Academic.Services.Abstractions;
 using Academic.Services.Models.Inputs;
 using Academic.Services.Models.Outputs;
+using FluentResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +12,10 @@ using System.Threading.Tasks;
 
 namespace Academic.Services.Services
 {
-    public class StudentServices : IStudentServices
+    public class StudentServices
+        (IStudentRepository studentRepository, IUnitOfWork unitOfWork, IModuleRepository moduleRepository
+        , IQuestionRepository questionRepository, IMapper mapper) 
+        : IStudentServices
     {
         public Task<List<ModuleDto>> GetAllModulesForStudent(int userId, int page = 1, int size = 10)
         {
@@ -51,14 +57,11 @@ namespace Academic.Services.Services
             throw new NotImplementedException();
         }
 
-        public Task<int> SolveQuestion(UserQuestionAnswerModel model)
+        public async Task<Result> SolveQuestion(UserQuestionAnswerModel model)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<SolvingQuestionAnswerDto> SolveQuestion(SolveQuestionModel model)
-        {
-            throw new NotImplementedException();
+            var answer = mapper.Map<UserQuestionAnswer>(model);
+            var result = await questionRepository.SolveQuestion(answer);
+            return result;
         }
 
         public Task<int> SolveTask(SolveTaskModel model)

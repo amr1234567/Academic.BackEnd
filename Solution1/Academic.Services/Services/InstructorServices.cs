@@ -23,13 +23,13 @@ namespace Academic.Services.Services
             {
                 throw new EntityNotFoundException(typeof(Quiz), quizId);
             }
-            var question = await questionRepository.GetQuestion(questionId);
-            if (question == null)
+            var questionResult = await questionRepository.GetQuestion(questionId);
+            if (questionResult.IsFailed)
             {
                 throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
 
             }
-            await quizRepository.AddQuestionsToSectionQuizByQuizId(quizId, question);
+            await quizRepository.AddQuestionsToSectionQuizByQuizId(quizId, questionResult.Value);
             await unitOfWork.SaveChangesAsync();
             return quizId;
         }
@@ -41,13 +41,13 @@ namespace Academic.Services.Services
             {
                 throw new EntityNotFoundException(typeof(PathTask), taskId);
             }
-            var question = await questionRepository.GetQuestion(questionId);
-            if (question == null)
+            var questionResult = await questionRepository.GetQuestion(questionId);
+            if (questionResult.IsFailed)
             {
                 throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
 
             }
-            await pathTasksRepository.AddQuestionsToTask(taskId, question);
+            await pathTasksRepository.AddQuestionsToTask(taskId, questionResult.Value);
             await unitOfWork.SaveChangesAsync();
             return taskId;
         }

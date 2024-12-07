@@ -27,7 +27,7 @@ namespace Academic.Repository.Data.Configurations
             // Relation
 
             builder.HasMany(p => p.Questions)
-                .WithMany()
+                .WithMany(q=>q.Quizs)
                 .UsingEntity<Dictionary<string, object>>(
                     "QuizQuestions", // Name of the join table
                     join =>

@@ -1,4 +1,6 @@
 ﻿
+using Academic.Core.Errors;
+using FluentResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,11 +24,23 @@ namespace Academic.Repository.Repositories
             return question.Id;
         }
 
-        public async Task<MultiChoiceQuestion?> GetQuestion(int questionId)
+        public async Task<Result<MultiChoiceQuestion>> GetAllAnswerForQuestion(int questionId, int page = 1, int size = 30)
+        {
+            var question = await context.MultiChoiceQuestions.AsNoTracking()
+                .Include(q=>q.UsersAnswers)
+                .FirstOrDefaultAsync(q => q.Id == questionId);
+            if (question == null)
+                return EntityNotFoundError.Exist(typeof(MultiChoiceQuestion), questionId);
+            return Result.Ok(question);
+        }
+
+        public async Task<Result<MultiChoiceQuestion>> GetQuestion(int questionId)
         {
             var question = await context.MultiChoiceQuestions.AsNoTracking()
                     .FirstOrDefaultAsync(q => q.Id == questionId);
-            return question;
+            return question is null ?
+                Result.Fail(EntityNotFoundError.Exist(typeof(MultiChoiceQuestion), questionId)) :
+                question.ToResult();
         }
 
         public async Task<List<MultiChoiceQuestion>> GetQuestionsForInstructor(int instructorId, int page = 1, int size = 10)
@@ -36,7 +50,7 @@ namespace Academic.Repository.Repositories
                     .Where(q => q.InstructorId == instructorId)
                     .Skip((page - 1) * size).Take(size).ToListAsync();
             return questions;
-        }
+        } 
 
         public async Task<List<MultiChoiceQuestion>> GetQuestionsForInstructorBySearch
             (int instructorId, string searchText = "", int page = 1, int size = 10)
@@ -48,6 +62,28 @@ namespace Academic.Repository.Repositories
                     .Skip((page - 1) * size).Take(size).ToListAsync();
 
             return questions;
+        }
+
+        public async Task<Result<List<MultiChoiceQuestion>>> GetQuestionsInSectionForUser(int quizId, int userId)
+        {
+            var questions = await context.MultiChoiceQuestions.AsNoTracking()
+                .Where(q => q.UsersAnswers.Any(a => a.UserId == userId))
+                .Where(q => q.Quizs.Any(quiz => quiz.Id == quizId))
+                .ToListAsync();
+            return Result.Ok(questions);
+        }
+
+        public async Task<Result> SolveQuestion(UserQuestionAnswer model)
+        {
+            if (model == null)
+                return BadRequestError.Exists(typeof(UserQuestionAnswer));
+            var questionResult = await GetQuestion(model.QuestionId);
+            if (questionResult.IsFailed)
+                return questionResult.ToResult();
+            var newModel = model;
+            newModel.IsCorrect = questionResult.Value.Answer == model.UserChoice;
+            await context.userQuestionAnswers.AddAsync(newModel);
+            return Result.Ok();
         }
 
         public async Task<int> UpdateQuestion(MultiChoiceQuestion question)
@@ -64,5 +100,6 @@ namespace Academic.Repository.Repositories
                     .SetProperty(q => q.Points, question.Points)
                 );
         }
+
     }
 }

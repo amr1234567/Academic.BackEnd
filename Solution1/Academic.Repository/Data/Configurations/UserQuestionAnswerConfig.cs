@@ -28,7 +28,7 @@ namespace Academic.Repository.Data.Configurations
 
             builder
                 .HasOne(uqa => uqa.Question)
-                .WithMany()
+                .WithMany(q=> q.UsersAnswers)
                 .HasForeignKey(uqa => uqa.QuestionId);
         }
     }

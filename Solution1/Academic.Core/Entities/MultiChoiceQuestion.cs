@@ -38,5 +38,8 @@ namespace Academic.Core.Entities
         public int InstructorId { get; set; }
         [ForeignKey(nameof(InstructorId))]
         public Instructor Instructor { get; set; }
+
+        public List<UserQuestionAnswer> UsersAnswers { get; set; }
+        public List<Quiz> Quizs { get; set; }
     }
 }
