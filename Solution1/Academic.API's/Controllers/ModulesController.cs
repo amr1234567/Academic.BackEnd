@@ -25,7 +25,7 @@ namespace Academic.API.Controllers
             return Ok(modules);
         }
 
-        [HttpGet("path/{pathid}")]
+        [HttpGet("path/{pathId}")]
         public async Task<IActionResult> GetModulesInPath(int pathId, [FromQuery] int page = 1
             , [FromQuery] int size = 10)
         {
@@ -34,7 +34,7 @@ namespace Academic.API.Controllers
             return Ok(modules);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{moduleId}")]
         public async Task<IActionResult> GetModuleById(int moduleId)
         {
             var module = await _moduleServices.GetModuleById(moduleId);
