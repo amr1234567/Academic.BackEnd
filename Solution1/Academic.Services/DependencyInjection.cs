@@ -30,6 +30,8 @@ namespace Academic.Services
 
             services.AddAuthServices(jwtConfig);
 
+            services.AddAutoMapper((c) => { });
+
 
             return services;
         }

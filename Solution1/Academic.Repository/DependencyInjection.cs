@@ -16,7 +16,7 @@ namespace Academic.Repository
         public static IServiceCollection AddRepositoryLayerServices
             (this IServiceCollection services, IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("default");
+            var connectionString = configuration.GetConnectionString("defaultShalaby");
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 //options.UseSqlServer(connectionString);

@@ -27,7 +27,7 @@ namespace Academic.Core.Entities
 
         public TimeSpan ExpectedTimeToComplete { get; set; }
 
-        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool? IsAccepted { get; private set; } = null;
         public DateTime? AcceptedAt { get; private set; }

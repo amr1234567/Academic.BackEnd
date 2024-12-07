@@ -23,7 +23,7 @@ namespace Academic.Repository.Repositories
             {
                 var question = await questionRepository.GetQuestion(questionId)
                     ?? throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
-                quiz.Questions.Add(question);
+                quiz.Questions.Add(question.Value);
             }
             quiz.Questions = quiz.Questions.Distinct().ToList();
             return quiz.Questions.Count;
@@ -92,7 +92,7 @@ namespace Academic.Repository.Repositories
             {
                 var question = await questionRepository.GetQuestion(questionId)
                      ?? throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
-                quiz.Questions.Remove(question);
+                quiz.Questions.Remove(question.Value);
             }
             return quiz.Questions.Count;
         }
@@ -107,7 +107,7 @@ namespace Academic.Repository.Repositories
             {
                 var question = await questionRepository.GetQuestion(questionId)
                      ?? throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
-                quiz.Questions.Remove(question);
+                quiz.Questions.Remove(question.Value);
             }
             return quiz.Questions.Count;
         }
