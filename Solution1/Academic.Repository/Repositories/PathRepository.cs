@@ -112,5 +112,32 @@ namespace Academic.Repository.Repositories
 
             return null;
         }
+
+        public Task<List<EducationalPath>> GetPathsWithCriteria(Func<EducationalPath, bool> criteria, int page = 1, int size = 15)
+        {
+
+            return Task.FromResult(
+                    _context.Paths.AsNoTracking()
+                        .Where(criteria).Skip((page - 1) * size)
+                        .Take(size).ToList()
+                );
+        }
+
+        public Task<List<EducationalPath>> GetPathsWithModulesAndInstructorWithCriteria(Func<EducationalPath, bool> criteria, int page = 1, int size = 15)
+        {
+            var pathsWithModules = _context.Paths.AsNoTracking().Include(p => p.Modules)
+                        .Where(criteria)
+                       .Skip((page - 1) * size)
+                       .Take(size).ToList();
+            return Task.FromResult(pathsWithModules);
+        }
+
+        public async Task<List<EducationalPath>> GetPathsWithModules(int page = 1, int size = 15)
+        {
+            var pathsWithModules = await _context.Paths.AsNoTracking().Include(p => p.Modules)
+                        .Skip((page - 1) * size)
+                        .Take(size).ToListAsync();
+            return pathsWithModules;
+        }
     }
 }

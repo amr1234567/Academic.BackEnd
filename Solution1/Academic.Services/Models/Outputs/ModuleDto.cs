@@ -4,6 +4,7 @@ namespace Academic.Services.Models.Outputs
 {
     public class ModuleDto
     {
+        public int Id { get; set; }
         public string Title { get; set; }  
 
         public double Difficulty { get; set; } 

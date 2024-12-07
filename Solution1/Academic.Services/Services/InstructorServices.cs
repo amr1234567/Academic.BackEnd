@@ -1,4 +1,5 @@
-﻿using Academic.Services.Abstractions;
+﻿using Academic.Core.Entities;
+using Academic.Services.Abstractions;
 using Academic.Services.Models.Inputs;
 using Academic.Services.Models.Outputs;
 using System;
@@ -9,29 +10,59 @@ using System.Threading.Tasks;
 
 namespace Academic.Services.Services
 {
-    public class InstructorServices : IInstructorsServices
+    public class InstructorServices
+        (IQuestionRepository questionRepository, IModuleSectionsRepository sectionsRepository,
+        IPathTasksRepository pathTasksRepository, IModuleRepository moduleRepository,
+        IPathRepository pathRepository, IUnitOfWork unitOfWork, IQuizRepository quizRepository,IMapper mapper)
+        : IInstructorsServices
     {
-        public Task<ModuleSectionDto> AddExistingQuestionToSection(int id, int questionId)
+        public async Task<int> AddExistingQuestionToSection(int quizId, int questionId)
+        {
+            var sectionQuiz = await quizRepository.GetQuizById(quizId);
+            if (sectionQuiz == null )
+            {
+                throw new EntityNotFoundException(typeof(Quiz), quizId);
+            }
+            var question = await questionRepository.GetQuestion(questionId);
+            if (question == null)
+            {
+                throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
+
+            }
+            await quizRepository.AddQuestionsToSectionQuizByQuizId(quizId, question);
+            await unitOfWork.SaveChangesAsync();
+            return quizId;
+        }
+
+        public async Task<int> AddExistingQuestionToTask(int taskId, int questionId)
+        {
+            var pathTask = await pathTasksRepository.GetTaskForPathById(taskId);
+            if (pathTask == null)
+            {
+                throw new EntityNotFoundException(typeof(PathTask), taskId);
+            }
+            var question = await questionRepository.GetQuestion(questionId);
+            if (question == null)
+            {
+                throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
+
+            }
+            await pathTasksRepository.AddQuestionsToTask(taskId, question);
+            await unitOfWork.SaveChangesAsync();
+            return taskId;
+        }
+
+        public Task<int> AddQuestionToSection(int id, CreatingQuestionModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<PathTaskModel> AddExistingQuestionToTask(int taskId, int questionId)
+        public Task<int> AddQuestionToTask(int taskId, CreatingQuestionModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ModuleSectionDto> AddQuestionToSection(int id, CreatingQuestionModel model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<PathTaskModel> AddQuestionToTask(int taskId, CreatingQuestionModel model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> CreateModel(CreatingModuleModel model)
+        public Task<int> CreateModule(CreatingModuleModel model)
         {
             throw new NotImplementedException();
         }
@@ -41,7 +72,7 @@ namespace Academic.Services.Services
             throw new NotImplementedException();
         }
 
-        public Task<ModuleSectionDto> DeleteFromSectionQuestion(int id, int questionId)
+        public Task<int> DeleteFromSectionQuestion(int id, int questionId)
         {
             throw new NotImplementedException();
         }
@@ -56,7 +87,7 @@ namespace Academic.Services.Services
             throw new NotImplementedException();
         }
 
-        public Task<PathTaskModel> DeleteQuestionFromTask(int taskId, int questionId)
+        public Task<int> DeleteQuestionFromTask(int taskId, int questionId)
         {
             throw new NotImplementedException();
         }
@@ -81,27 +112,27 @@ namespace Academic.Services.Services
             throw new NotImplementedException();
         }
 
-        public Task<InstructorDto> UpdateInstructorDetails(UpdateInstructorModel model)
+        public Task<int> UpdateInstructorDetails(UpdateInstructorModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ModuleDto> UpdateModuleDetails(int id, UpdateModuleModel model)
+        public Task<int> UpdateModuleDetails(int id, UpdateModuleModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<PathDto> UpdatePathDetails(int id, UpdatePathModel model)
+        public Task<int> UpdatePathDetails(int id, UpdatePathModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<PathTaskModel> UpdatePathTask(int id, UpdatePathTaskModel model)
+        public Task<int> UpdatePathTask(int id, UpdatePathTaskModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ModuleSectionDto> UpdateSectionDetails(int id, UpdatingModuleSectionModel model)
+        public Task<int> UpdateSectionDetails(int id, UpdatingModuleSectionModel model)
         {
             throw new NotImplementedException();
         }

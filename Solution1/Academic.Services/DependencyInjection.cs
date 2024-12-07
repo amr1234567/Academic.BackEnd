@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
-namespace Academic.Repository
+namespace Academic.Services
 {
     public static class DependencyInjection
     {
@@ -24,6 +24,7 @@ namespace Academic.Repository
             services.AddScoped<IIdentityUserServices, IdentityUserServices>();
             services.AddScoped<ITokenServices, TokenServices>();
 
+            services.AddSingleton<AccountServicesHelpers>();
             var jwtConfig = new JwtHelper();
             configuration.GetSection("Jwt").Bind(jwtConfig);
 

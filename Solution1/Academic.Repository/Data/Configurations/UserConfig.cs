@@ -11,7 +11,6 @@ namespace Academic.Repository.Data.Configurations
         void IEntityTypeConfiguration<User>.Configure(EntityTypeBuilder<User> builder)
         {
             // Key
-          
             builder.ComplexProperty(u => u.Education, e =>
             {
                 e.Property(p => p.EducationalClass)
@@ -26,8 +25,6 @@ namespace Academic.Repository.Data.Configurations
                        data => (EducationalLevel)Enum.Parse(typeof(EducationalLevel), data))
                    .HasColumnType($"ENUM('{EducationalLevel.Secondary.ToString()}','{EducationalLevel.Preparatory.ToString()}','{EducationalLevel.Graduated.ToString()}','{EducationalLevel.Undergraduate.ToString()}')");
             });
-
-            
 
             builder.Property(u => u.Country).IsRequired()
                .HasColumnType("varchar(255)");

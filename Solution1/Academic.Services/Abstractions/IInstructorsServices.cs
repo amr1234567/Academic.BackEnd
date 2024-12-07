@@ -12,26 +12,26 @@ namespace Academic.Services.Abstractions
     {
         Task<int> CreatePath(CreatingPathModel model);
         Task<int> DeletePath(int pathId);
-        Task<PathDto> UpdatePathDetails(int id, UpdatePathModel model);
+        Task<int> UpdatePathDetails(int id, UpdatePathModel model);
 
-        Task<int> CreateModel(CreatingModuleModel model);
+        Task<int> CreateModule(CreatingModuleModel model);
         Task<int> DeleteModule(int pathId);
-        Task<ModuleDto> UpdateModuleDetails(int id, UpdateModuleModel model);
+        Task<int> UpdateModuleDetails(int id, UpdateModuleModel model);
 
         Task<int> GenerateSection(CreatingModuleSectionModel model);
-        Task<ModuleSectionDto> UpdateSectionDetails(int id, UpdatingModuleSectionModel model);
-        Task<ModuleSectionDto> AddQuestionToSection(int id, CreatingQuestionModel model);
-        Task<ModuleSectionDto> AddExistingQuestionToSection(int id, int questionId);
-        Task<ModuleSectionDto> DeleteFromSectionQuestion(int id, int questionId);
+        Task<int> UpdateSectionDetails(int id, UpdatingModuleSectionModel model);
+        Task<int> AddQuestionToSection(int id, CreatingQuestionModel model);
+        Task<int> AddExistingQuestionToSection(int id, int questionId);
+        Task<int> DeleteFromSectionQuestion(int id, int questionId);
         Task<int> DeleteSection(int sectionId);
 
         Task<int> GenerateTask(CreatingPathTaskModel model);
         Task<int> DeleteTask(int taskId);
-        Task<PathTaskModel> UpdatePathTask(int id, UpdatePathTaskModel model);
-        Task<PathTaskModel> AddQuestionToTask(int taskId, CreatingQuestionModel model);
-        Task<PathTaskModel> AddExistingQuestionToTask(int taskId, int questionId);
-        Task<PathTaskModel> DeleteQuestionFromTask(int taskId, int questionId);
+        Task<int> UpdatePathTask(int id, UpdatePathTaskModel model);
+        Task<int> AddQuestionToTask(int taskId, CreatingQuestionModel model);
+        Task<int> AddExistingQuestionToTask(int taskId, int questionId);
+        Task<int> DeleteQuestionFromTask(int taskId, int questionId);
 
-        Task<InstructorDto> UpdateInstructorDetails(UpdateInstructorModel model);
+        Task<int> UpdateInstructorDetails(UpdateInstructorModel model);
     }
 }

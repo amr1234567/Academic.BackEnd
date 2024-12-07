@@ -20,8 +20,8 @@ namespace Academic.Services.Abstractions
         Task<List<UserDto>> GetTopInScore(int num);
         Task<int> SolveTask(SolveTaskModel model);
         Task<SolvingQuestionAnswerDto> SolveQuestion(SolveQuestionModel model);
-        Task<List<PathDto>> GetAllPathsForUser(int userId, int page = 1, int size = 10);
-        Task<List<ModuleDto>> GetAllModulesForUser(int userId, int page = 1, int size = 10);
+        Task<List<PathDto>> GetAllPathsForStudent(int userId, int page = 1, int size = 10);
+        Task<List<ModuleDto>> GetAllModulesForStudent(int userId, int page = 1, int size = 10);
         Task<double> GetProgressInPath(int userId, int pathId);
     }
 }

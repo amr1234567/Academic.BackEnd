@@ -11,12 +11,12 @@ namespace Academic.Services.Services
 {
     public class StudentServices : IStudentServices
     {
-        public Task<List<ModuleDto>> GetAllModulesForUser(int userId, int page = 1, int size = 10)
+        public Task<List<ModuleDto>> GetAllModulesForStudent(int userId, int page = 1, int size = 10)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<PathDto>> GetAllPathsForUser(int userId, int page = 1, int size = 10)
+        public Task<List<PathDto>> GetAllPathsForStudent(int userId, int page = 1, int size = 10)
         {
             throw new NotImplementedException();
         }
