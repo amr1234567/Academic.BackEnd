@@ -1,7 +1,9 @@
 ﻿using Academic.Core.Entities;
+using Academic.Core.Errors;
 using Academic.Services.Abstractions;
 using Academic.Services.Models.Inputs;
 using Academic.Services.Models.Outputs;
+using Microsoft.AspNetCore.Http.HttpResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +64,7 @@ namespace Academic.Services.Services
             throw new NotImplementedException();
         }
 
-        public Task<int> CreateModule(CreatingModuleModel model)
+        public async Task<int> CreateModule(CreatingModuleModel model)
         {
             throw new NotImplementedException();
         }
