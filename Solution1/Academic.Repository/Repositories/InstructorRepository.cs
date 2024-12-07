@@ -23,7 +23,7 @@ namespace Academic.Repository.Repositories
         public async Task<int> GenerateNewInstructor(Instructor instructor)
         {
             await _context.Instructors.AddAsync(instructor);
-            return await _context.SaveChangesAsync();
+            return instructor.Id;
         }
 
         public async Task<int> DeleteInstructor(int instructorId)

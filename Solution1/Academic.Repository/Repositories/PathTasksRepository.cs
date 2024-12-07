@@ -22,14 +22,14 @@ namespace Academic.Repository.Repositories
         public async Task<PathTask> GenerateTaskForPath(PathTask path)
         {
             await _context.PathTasks.AddAsync(path);
-            await _context.SaveChangesAsync();
+             
             return path;
         }
 
         public async Task<PathTask> UpdateTask(PathTask path)
         {
             _context.PathTasks.Update(path);
-            await _context.SaveChangesAsync();
+             
             return path;
         }
 
@@ -38,7 +38,7 @@ namespace Academic.Repository.Repositories
             var task = await _context.PathTasks.FirstOrDefaultAsync(t => t.PathId == pathId);
 
             _context.PathTasks.Remove(task);
-            await _context.SaveChangesAsync();
+             
             return task;
         }
 
