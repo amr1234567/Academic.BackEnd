@@ -32,8 +32,10 @@ namespace Academic.Core.Entities
         [Range(1, int.MaxValue)]
         public int NumOfModules { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
+        public bool? IsAccepted { get; private set; } = null;
+        public DateTime? AcceptedAt {  get; private set; }
         // 1(Path) - M(Module)
         public List<Module>? Modules { get; set; }
 
@@ -49,5 +51,17 @@ namespace Academic.Core.Entities
 
         // M - M
         public List<User> Users { get; set; }
+
+
+        public void AcceptPath()
+        {
+            IsAccepted = true;
+            AcceptedAt = DateTime.UtcNow;
+        }
+        public void RejectPath()
+        {
+            IsAccepted = false;
+            AcceptedAt = DateTime.UtcNow;
+        }
     }
 }

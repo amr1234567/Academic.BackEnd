@@ -27,7 +27,10 @@ namespace Academic.Core.Entities
 
         public TimeSpan ExpectedTimeToComplete { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+
+        public bool? IsAccepted { get; private set; } = null;
+        public DateTime? AcceptedAt { get; private set; }
 
         // 1(Path) - M(Module)
         [Required]
@@ -38,5 +41,16 @@ namespace Academic.Core.Entities
 
         public ICollection<ModuleSection> Sections { get; set; }
         public ICollection<User> Users { get; set; }
+
+        public void AcceptModule()
+        {
+            IsAccepted = true;
+            AcceptedAt = DateTime.UtcNow;
+        }
+        public void RejectModule()
+        {
+            IsAccepted = false;
+            AcceptedAt = DateTime.UtcNow;
+        }
     }
 }

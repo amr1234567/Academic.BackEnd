@@ -20,6 +20,7 @@ namespace Academic.Core.Base
 
         [Required]
         public string Password { get; set; }
+        public string Salt { get; set; }
 
         [Required]
         [Phone]
@@ -27,6 +28,7 @@ namespace Academic.Core.Base
         public ApplicationRole Role { get; set; }
 
         public string? RefreshToken { get; set; }
+        
         public DateTime? RefreshTokenExpiredAt { get; set; }
 
         public bool IsUserLoggedIn => !string.IsNullOrWhiteSpace(RefreshToken) && RefreshTokenExpiredAt > DateTime.UtcNow;

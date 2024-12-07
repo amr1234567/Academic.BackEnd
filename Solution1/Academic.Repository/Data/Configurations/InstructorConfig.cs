@@ -13,7 +13,9 @@ namespace Academic.Repository.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Instructor> builder)
         {
-            builder.Property(i => i.HashedPassword).HasColumnType("varchar(255)").IsRequired();
+            builder.Property(i => i.HashedPassword)
+            .HasColumnType("varchar(255)")
+            .IsRequired();
 
             builder.Property(i => i.JobType).IsRequired().HasColumnType("varchar(255)").HasMaxLength(100);
         }
