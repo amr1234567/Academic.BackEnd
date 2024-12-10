@@ -9,23 +9,23 @@ namespace Academic.Services.Services
         AccountServicesHelpers accountServices)
         : IIdentityUserServices
     {
-        public async Task<UserDto> GetUserData(int userId)
+        public async Task<Result<UserDto>> GetUserData(int userId)
         {
             var user = await userIdentityRepository.GetById(userId);
             if (user == null)
-                throw new EntityNotFoundException(typeof(IdentityUser), userId);
-            return mapper.Map<UserDto>(user);
+                return EntityNotFoundError.Exists(typeof(IdentityUser), userId);
+            return Result.Ok(mapper.Map<UserDto>(user));
         }
 
-        public async Task<TokenModel> SignIn(string email, string password)
+        public async Task<Result<TokenModel>> SignIn(string email, string password)
         {
             var user = await userIdentityRepository.GetByEmail(email);
             if (user == null)
-                throw new BadRequestExecption("email or password wrong");
+                return BadRequestError.Exists("email or password wrong");
 
             var checkPasswordResult = CheckPasswordWithHashed(user.Password, password, user.Salt);
             if (!checkPasswordResult)
-                throw new BadRequestExecption("email or password wrong");
+                return BadRequestError.Exists("email or password wrong");
             var claims = new List<Claim>()
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -39,14 +39,14 @@ namespace Academic.Services.Services
             return token;
         }
 
-        public async Task<int> SignOut(string email)
+        public async Task<Result> SignOut(string email)
         {
             var user = await userIdentityRepository.GetByEmail(email);
             if (user == null)
                 throw new BadRequestExecption("email is wrong");
             await tokenServices.RevokeTokenWithUserId(user.Id);
             await unitOfWork.SaveChangesAsync();
-            return  1;
+            return Result.Ok();
         }
 
         private bool CheckPasswordWithHashed(string hashedPassword, string givenPassword, string salt)

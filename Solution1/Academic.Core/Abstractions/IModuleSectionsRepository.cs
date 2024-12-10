@@ -1,4 +1,5 @@
 ﻿using Academic.Core.Entities;
+using FluentResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,9 @@ namespace Academic.Core.Abstractions
 {
     public interface IModuleSectionsRepository
     {
-        Task<int> GenerateNewModuleSectionInModule(ModuleSection moduleSection);
-        Task<ModuleSection> DeleteModuleSection(int moduleSectionId);
-        Task<ModuleSection> UpdateModuleSection(ModuleSection moduleSection);
+        Task<Result> GenerateNewModuleSectionInModule(ModuleSection moduleSection);
+        Task<Result> DeleteModuleSection(int moduleSectionId);
+        Task<Result> UpdateModuleSection(ModuleSection moduleSection);
         Task<ModuleSection> GetModuleSectionById(int moduleSectionId);
         Task<List<ModuleSection>> GetModuleSectionsInModule(int moduleId, int page = 1, int size = 15);
         Task<int> GetNumOfModuleSectionsInModule(int moduleId);

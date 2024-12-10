@@ -1,4 +1,5 @@
 ﻿using Academic.Core.Entities;
+using FluentResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +17,9 @@ namespace Academic.Core.Abstractions
         Task<PathTask> GetTaskForPathById(int taskId);
         Task<List<PathTask>> GetPathTasks(int page = 1, int size = 10);
 
-        Task<int> AddQuestionsToTask(int taskId, params int[] questionId);
-        Task<int> AddQuestionsToTask(int taskId, params MultiChoiceQuestion[] question);
+        Task<Result> AddQuestionsToTask(int taskId, params int[] questionId);
+        Task<Result> AddQuestionsToTask(int taskId, params MultiChoiceQuestion[] question);
 
-        Task<int> RemoveQuestionsFromTask(int taskId, params int[] questionId);
+        Task<Result> RemoveQuestionsFromTask(int taskId, params int[] questionId);
     }
 }

@@ -3,6 +3,7 @@ using Academic.Core.Exceptions;
 using Academic.Core.Helpers;
 using Academic.Core.Identitiy;
 using Academic.Services.Abstractions;
+using Academic.Services.Errors;
 using Academic.Services.Models.Outputs;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -19,7 +20,7 @@ namespace Academic.Services.Services
     {
         private readonly JwtHelper _jwtHelper = jwtOptions.Value;
 
-        public async Task<TokenModel> GenerateNewTokenModel(int userId, IEnumerable<Claim>? claims = null)
+        public async Task<Result<TokenModel>> GenerateNewTokenModel(int userId, IEnumerable<Claim>? claims = null)
         {
             var refreshToken = await GenerateNewRefreshToken();
             var token = await GenerateNewToken(claims);
@@ -29,25 +30,25 @@ namespace Academic.Services.Services
                 u.RefreshToken = refreshToken;
                 u.RefreshTokenExpiredAt = DateTime.UtcNow.AddDays(_jwtHelper.RefreshTokenExpireDays);
             });
-            return new TokenModel
+            return Result.Ok(new TokenModel
             {
                 Token = token,
                 RefreshToken = refreshToken,
                 ExpireDate = DateTime.Now.AddMinutes(_jwtHelper.JwtExpireMinutes),
-            };
+            });
         }
 
-        public async Task<bool> RevokeAllTokens()
+        public async Task<Result> RevokeAllTokens()
         {
             await userRepository.UpdateAllWithFunc(u =>
             {
                 u.RefreshToken = null;
                 u.RefreshTokenExpiredAt = null;
             });
-            return true;
+            return Result.Ok();
         }
 
-        public async Task<bool> RevokeToken(string refreshToken)
+        public async Task<Result> RevokeToken(string refreshToken)
         {
             await userRepository.UpdateByCriteriaWithFunc(u => u.RefreshToken == refreshToken,
                 action: u =>
@@ -55,36 +56,36 @@ namespace Academic.Services.Services
                     u.RefreshToken = null;
                     u.RefreshTokenExpiredAt = null;
                 });
-            return true;
+            return Result.Ok();
         }
 
-        public async Task<TokenModel> RefreshTheToken(string refreshToken, string token)
+        public async Task<Result<TokenModel>> RefreshTheToken(string refreshToken, string token)
         {
             var user = await userRepository.GetUserByCriteria(u => u.RefreshToken == refreshToken);
             if (user == null)
-                throw new EntityNotFoundException(typeof(User), refreshToken);
+                return EntityNotFoundError.Exists(typeof(User), refreshToken);
             if (!user.IsUserLoggedIn)
-                throw new SecurityTokenExpiredException(token);
+                return new SecurityTokenExpiredError();
             var princ = GetPrincipalFromExpiredToken(token);
 
             var idClaim = princ.Claims.FirstOrDefault(c => c.Type.Equals(ClaimTypes.NameIdentifier));
 
             if (idClaim is null || idClaim.Value != user.Id.ToString())
-                throw new TokenNotValidException("Token is invalid");
-            return new TokenModel
+                return new TokenNotValidError("Token is invalid");
+            return Result.Ok(new TokenModel
             {
                 ExpireDate = DateTime.Now.AddMinutes(_jwtHelper.JwtExpireMinutes),
                 RefreshToken = refreshToken,
                 Token = GenerateTokenFromPrincipal(princ),
-            };
+            });
         }
 
-        public async Task<bool> RevokeTokenWithUserId(int userId)
+        public async Task<Result> RevokeTokenWithUserId(int userId)
         {
 
             await userRepository.UpdateByCriteriaWithFunc(u => u.Id == userId,
                  action: u => u.RefreshToken = null);
-            return true;
+            return Result.Ok();
         }
 
 

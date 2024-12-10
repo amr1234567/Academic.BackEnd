@@ -1,5 +1,6 @@
 ﻿using Academic.Core.Abstractions;
 using Academic.Core.Entities;
+using Academic.Core.Errors;
 using Academic.Repository.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -18,21 +19,22 @@ namespace Academic.Repository.Repositories
             this._context = context;
         }
 
-        public async Task<int> GenerateNewPath(EducationalPath path)
+        public async Task<Result> GenerateNewPath(EducationalPath path)
         {
-            var ok = 1;
+            if (path == null)
+                return EntityNotFoundError.Exists(typeName: typeof(EducationalPath));
             await _context.Paths.AddAsync(path);
             
-            return ok;
+            return Result.Ok();
         }
 
-        public async Task<EducationalPath> DeletePath(int pathId)
+        public async Task<Result> DeletePath(int pathId)
         {
             var path = await _context.Paths.FindAsync(pathId);
-            if (path != null)
-                _context.Paths.Remove(path);
-
-            return path;
+            if (path == null)
+                return EntityNotFoundError.Exists(typeName: typeof(EducationalPath), pathId);
+            _context.Paths.Remove(path);
+            return Result.Ok();
         }
 
         public async Task<EducationalPath> GetPath(int pathId)
@@ -81,7 +83,7 @@ namespace Academic.Repository.Repositories
                 .ToListAsync();
         }
 
-        public async Task<EducationalPath> UpdatePath(EducationalPath path)
+        public async Task<Result> UpdatePath(EducationalPath path)
         {
             var newPathData = await _context.Paths.FindAsync(path.Id);
             if (newPathData != null)
@@ -95,9 +97,9 @@ namespace Academic.Repository.Repositories
                 newPathData.PathTaskId = path.PathTaskId;
 
                 
-                return newPathData;
+                return Result.Ok();
             }
-            return null;
+            return EntityNotFoundError.Exists(typeof(EducationalPath), path.Id);
         }
 
         public Task<List<EducationalPath>> GetPathsWithCriteria(Func<EducationalPath, bool> criteria, int page = 1, int size = 15)

@@ -1,12 +1,4 @@
-﻿using Academic.Core.Abstractions;
-using Academic.Core.Entities;
-using Academic.Repository.Data;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Academic.Core.Errors;
 
 namespace Academic.Repository.Repositories
 {
@@ -19,12 +11,14 @@ namespace Academic.Repository.Repositories
         {
             this._context = context;
         }
-        public async Task<int> GenerateModule(Module module)
+        public async Task<Result> GenerateModule(Module module)
         {
+            if (module == null) 
+                return EntityNotFoundError.Exists(typeName: typeof(Module));
             await _context.Modules.AddAsync(module);
-            return await _context.SaveChangesAsync();
+            return Result.Ok();
         }
-        public async Task<Module> DeleteModule(int moduleId)
+        public async Task<Result> DeleteModule(int moduleId)
         {
             // Find module 
             var module = await _context.Modules.FindAsync(moduleId);
@@ -33,11 +27,10 @@ namespace Academic.Repository.Repositories
             {
                 // Remove
                _context.Modules.Remove(module);
-                await _context.SaveChangesAsync();
-                //return module;
+                return Result.Ok();
             }
+            return EntityNotFoundError.Exists(typeName: typeof(Module), moduleId);
             // not found
-            return null; 
         }
 
         public async Task<Module> GetModule(int moduleId)
@@ -85,7 +78,7 @@ namespace Academic.Repository.Repositories
                 .CountAsync();
         }
 
-        public async Task<Module> UpdateModule(Module module)
+        public async Task<Result> UpdateModule(Module module)
         {
             var newModuleData = await _context.Modules.FindAsync(module.Id);
 
@@ -100,11 +93,10 @@ namespace Academic.Repository.Repositories
                 newModuleData.PathId = module.PathId;
                 // update 
                 _context.Modules.Update(newModuleData);
-                await _context.SaveChangesAsync();
-                return newModuleData;
+                return Result.Ok();
             }
 
-            return null;
+            return EntityNotFoundError.Exists(typeName: typeof(Module), module.Id);
         }
     }
 }

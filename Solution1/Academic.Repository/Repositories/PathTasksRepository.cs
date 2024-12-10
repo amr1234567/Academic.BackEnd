@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
+using Academic.Core.Errors;
 
 namespace Academic.Repository.Repositories
 {
@@ -72,99 +73,76 @@ namespace Academic.Repository.Repositories
                 .ToListAsync();
         }
 
-        public async Task<int> AddQuestionsToTask(int taskId, params int[] questionId)
+        public async Task<Result> AddQuestionsToTask(int taskId, params int[] questionIds)
         {
-            if (questionId == null)
-            {
-                throw new ArgumentException("No questionIds Added");
-            }
+            if (questionIds == null || questionIds.Length == 0)
+                return EntityNotFoundError.Exists("No QuestionIds provided");
+
 
             var task = await _context.PathTasks
                 .Include(t => t.Questions)
                 .FirstOrDefaultAsync(t => t.Id == taskId);
 
             if (task == null)
-            {
-                throw new ArgumentException("Task not found.");
-            }
+                return EntityNotFoundError.Exists(typeof(PathTask), taskId);
 
             var questions = await _context.MultiChoiceQuestions
-                .Where(q => questionId.Contains(q.Id))
+                .Where(q => questionIds.Contains(q.Id))
                 .ToListAsync();
 
-            int addedCount = 0;
             foreach (var question in questions)
-            {
-                if (!task.Questions.Contains(question))
-                {
-                    task.Questions.Add(question);
-                    addedCount++;
-                }
-            }
+                task.Questions.Add(question);
 
-            return addedCount;
+            task.Questions = task.Questions.Distinct().ToList();
+        
+            return Result.Ok();
         }
 
-        public async Task<int> AddQuestionsToTask(int taskId, params MultiChoiceQuestion[] questions)
+        public async Task<Result> AddQuestionsToTask(int taskId, params MultiChoiceQuestion[] questions)
         {
-            if (questions == null )
-            {
-                throw new ArgumentException("No questions Added");
-            }
+            if (questions == null || questions.Length == 0)
+                return EntityNotFoundError.Exists("No Questions provided");
 
             var task = await _context.PathTasks
                 .Include(t => t.Questions)
                 .FirstOrDefaultAsync(t => t.Id == taskId);
 
             if (task == null)
-            {
-                throw new ArgumentException("Task not found.");
-            }
+                return EntityNotFoundError.Exists(typeof(PathTask), taskId);
 
-            int addedCount = 0;
+
             foreach (var question in questions)
-            {
-                if (!task.Questions.Contains(question))
-                {
-                    task.Questions.Add(question);
-                    addedCount++;
-                }
-            }
+                task.Questions.Add(question);
 
-            return addedCount;
+            task.Questions = task.Questions.Distinct().ToList();
+
+            return Result.Ok();
         }
 
-        public async Task<int> RemoveQuestionsFromTask(int taskId, params int[] questionId)
+        public async Task<Result> RemoveQuestionsFromTask(int taskId, params int[] questionIds)
         {
-            if (questionId == null )
-            {
-                throw new ArgumentException("No questionIds Added");
-            }
+            
+            if (questionIds == null || questionIds.Length == 0)
+                return BadRequestError.Exists($"{nameof(questionIds)} must be provided");
 
             var task = await _context.PathTasks
                 .Include(t => t.Questions)
                 .FirstOrDefaultAsync(t => t.Id == taskId);
 
             if (task == null)
-            {
-                throw new ArgumentException("Task not found.");
-            }
+                return EntityNotFoundError.Exists(typeof(PathTask), taskId);
 
             var questions = await _context.MultiChoiceQuestions
-                .Where(q => questionId.Contains(q.Id))
+                .Where(q => questionIds.Contains(q.Id))
                 .ToListAsync();
 
-            int removedCount = 0;
-            foreach (var question in questions)
-            {
-                if (task.Questions.Contains(question))
-                {
-                    task.Questions.Remove(question);
-                    removedCount++;
-                }
-            }
+            if (questions == null || questions.Count == 0)
+                return EntityNotFoundError.Exists("No Questions Found for these ids");
 
-            return removedCount;
+            foreach (var question in questions)
+                task.Questions.Remove(question);
+
+            return Result.Ok();
         }
     }
 }

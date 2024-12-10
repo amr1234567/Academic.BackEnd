@@ -22,13 +22,14 @@ namespace Academic.Core.Errors
             : base($"entity from type '{typeName}' with identifier '{identifier}' [NOT FOUND]")
         {
         }
-        private EntityNotFoundError(string typeName)
-            : base($"entity from type '{typeName}' [NOT FOUND]")
+        private EntityNotFoundError(string message)
+            : base(message)
         {
         }
-        public static EntityNotFoundError Exist(Type typeName, object identifier) => new(typeName, identifier);
-        public static EntityNotFoundError Exist(Type typeName) => new(typeName);
-        public static EntityNotFoundError Exist(string typeName, object identifier) => new(typeName, identifier);
-        public static EntityNotFoundError Exist(string typeName) => new(typeName);
+        public static EntityNotFoundError Exists(Type typeName, object identifier) => new(typeName, identifier);
+        public static EntityNotFoundError Exists<T>( object identifier) => new(typeof(T), identifier);
+        public static EntityNotFoundError Exists(Type typeName) => new(typeName);
+        public static EntityNotFoundError Exists(string typeName, object identifier) => new(typeName, identifier);
+        public static EntityNotFoundError Exists(string message) => new(message);
     }
 }

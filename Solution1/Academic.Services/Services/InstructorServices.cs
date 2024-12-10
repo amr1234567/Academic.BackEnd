@@ -1,13 +1,5 @@
 ﻿using Academic.Core.Entities;
-using Academic.Core.Errors;
-using Academic.Services.Abstractions;
 using Academic.Services.Models.Inputs;
-using Academic.Services.Models.Outputs;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Academic.Services.Services
@@ -18,123 +10,196 @@ namespace Academic.Services.Services
         IPathRepository pathRepository, IUnitOfWork unitOfWork, IQuizRepository quizRepository,IMapper mapper)
         : IInstructorsServices
     {
-        public async Task<int> AddExistingQuestionToSection(int quizId, int questionId)
+        public async Task<Result> AddExistingQuestionToSection(int quizId, int questionId)
         {
             var sectionQuiz = await quizRepository.GetQuizById(quizId);
             if (sectionQuiz == null )
             {
-                throw new EntityNotFoundException(typeof(Quiz), quizId);
+                return EntityNotFoundError.Exists(typeof(Quiz), quizId);
             }
             var questionResult = await questionRepository.GetQuestion(questionId);
             if (questionResult.IsFailed)
             {
-                throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
+                return EntityNotFoundError.Exists(typeof(MultiChoiceQuestion), questionId);
 
             }
             await quizRepository.AddQuestionsToSectionQuizByQuizId(quizId, questionResult.Value);
             await unitOfWork.SaveChangesAsync();
-            return quizId;
+            return Result.Ok();
         }
 
-        public async Task<int> AddExistingQuestionToTask(int taskId, int questionId)
+        public async Task<Result> AddExistingQuestionToTask(int taskId, int questionId)
         {
             var pathTask = await pathTasksRepository.GetTaskForPathById(taskId);
             if (pathTask == null)
             {
-                throw new EntityNotFoundException(typeof(PathTask), taskId);
+                return EntityNotFoundError.Exists(typeof(PathTask), taskId);
             }
             var questionResult = await questionRepository.GetQuestion(questionId);
             if (questionResult.IsFailed)
             {
-                throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
+                return EntityNotFoundError.Exists(typeof(MultiChoiceQuestion), questionId);
 
             }
             await pathTasksRepository.AddQuestionsToTask(taskId, questionResult.Value);
             await unitOfWork.SaveChangesAsync();
-            return taskId;
+            return Result.Ok();
         }
 
-        public Task<int> AddQuestionToSection(int id, CreatingQuestionModel model)
+        public async Task<Result> AddQuestionToSection(int id, CreatingQuestionModel model)
+        {
+            if (model == null)
+                return BadRequestError.Exists(typeof(CreatingQuestionModel));
+            var quiz = await quizRepository.GetQuizBySectionId(id);
+            if (quiz == null)
+                return EntityNotFoundError.Exists(typeof(Quiz), id);
+            var question = mapper.Map<MultiChoiceQuestion>(model);
+            var result = await quizRepository.AddQuestionsToSectionQuizBySectionId(id, question);
+            if (result.IsFailed)
+                return result;
+            await unitOfWork.SaveChangesAsync();
+            return result;
+        }
+
+        public async Task<Result> AddQuestionToTask(int taskId, CreatingQuestionModel model)
+        {
+            if (model == null)
+                return BadRequestError.Exists(typeof(CreatingQuestionModel));
+            var pathTask = await pathTasksRepository.GetTaskForPathById(taskId);
+            if (pathTask == null)
+                return EntityNotFoundError.Exists(typeof(PathTask), taskId);
+            var question = mapper.Map<MultiChoiceQuestion>(model);
+            var result = await pathTasksRepository.AddQuestionsToTask(taskId, question);
+            if (result.IsFailed)
+                return result;
+            await unitOfWork.SaveChangesAsync();
+            return result;
+        }
+
+        public async Task<Result> CreateModule(CreatingModuleModel model)
+        {
+            if (model == null)
+                return BadRequestError.Exists(typeof(CreatingModuleModel));
+            var module = mapper.Map<Module>(model);
+            var result = await moduleRepository.GenerateModule(module);
+            if (result.IsFailed)
+                return result;
+            await unitOfWork.SaveChangesAsync();
+            return result;
+        }
+
+        public async Task<Result> CreatePath(CreatingPathModel model)
+        {
+            if (model == null)
+                return BadRequestError.Exists(typeof(CreatingPathModel));
+            var path = mapper.Map<EducationalPath>(model);
+            var result = await pathRepository.GenerateNewPath(path);
+            if (result.IsFailed)
+                return result;
+            await unitOfWork.SaveChangesAsync();
+            return result;
+        }
+
+        public async Task<Result> DeleteQuestionFromSection(int id, int questionId)
+        {
+            var quiz = await quizRepository.GetQuizBySectionId(id);
+            if (quiz == null)
+                return BadRequestError.Exists(typeof(Quiz));
+            var question = await questionRepository.GetQuestion(questionId);
+            if (question == null)
+                return BadRequestError.Exists(typeof(MultiChoiceQuestion));
+            var result = await quizRepository.RemoveQuestionsFromSectionQuizBySectionId(id, questionId);
+            if (result.IsFailed)
+                return result;
+            await unitOfWork.SaveChangesAsync();
+            return result;
+        }
+
+        public async Task<Result> DeleteModule(int moduleId)
+        {
+            var module = await moduleRepository.GetModule(moduleId);
+            if (module == null)
+                return EntityNotFoundError.Exists(typeof(Module), moduleId);
+            var result = await moduleRepository.DeleteModule(moduleId);
+            if (result.IsFailed) return result;
+            await unitOfWork.SaveChangesAsync();
+            return result;
+        }
+
+        public async Task<Result> DeletePath(int pathId)
+        {
+            var module = await pathRepository.GetPath(pathId);
+            if (module == null)
+                return EntityNotFoundError.Exists(typeof(EducationalPath), pathId);
+            var result = await pathRepository.DeletePath(pathId);
+            if (result.IsFailed) return result;
+            await unitOfWork.SaveChangesAsync();
+            return result;
+        }
+
+        public async Task<Result> DeleteQuestionFromTask(int taskId, int questionId)
+        {
+            var pathTask = await pathTasksRepository.GetTaskForPathById(taskId);
+            if (pathTask == null)
+                return BadRequestError.Exists<PathTask>();
+            var question = await questionRepository.GetQuestion(questionId);
+            if (question == null)
+                return BadRequestError.Exists(typeof(MultiChoiceQuestion));
+            var result = await pathTasksRepository.RemoveQuestionsFromTask(taskId, questionId);
+            if (result.IsFailed)
+                return result;
+            await unitOfWork.SaveChangesAsync();
+            return result;
+        }
+
+        public async Task<Result> DeleteSection(int sectionId)
+        {
+            var section = await sectionsRepository.GetModuleSectionById(sectionId);
+            if (section == null)
+                return BadRequestError.Exists<ModuleSection>();
+            var result = await sectionsRepository.DeleteModuleSection(sectionId);
+            if (result.IsFailed)
+                return result;
+            await unitOfWork.SaveChangesAsync();
+            return result;
+        }
+
+        public Task<Result> DeleteTask(int taskId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<int> AddQuestionToTask(int taskId, CreatingQuestionModel model)
+        public Task<Result> GenerateSection(CreatingModuleSectionModel model)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<int> CreateModule(CreatingModuleModel model)
+        public Task<Result> GenerateTask(CreatingPathTaskModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<int> CreatePath(CreatingPathModel model)
+        public Task<Result> UpdateInstructorDetails(UpdateInstructorModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<int> DeleteFromSectionQuestion(int id, int questionId)
+        public Task<Result> UpdateModuleDetails(int id, UpdateModuleModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<int> DeleteModule(int pathId)
+        public Task<Result> UpdatePathDetails(int id, UpdatePathModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<int> DeletePath(int pathId)
+        public Task<Result> UpdatePathTask(int id, UpdatePathTaskModel model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<int> DeleteQuestionFromTask(int taskId, int questionId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> DeleteSection(int sectionId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> DeleteTask(int taskId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> GenerateSection(CreatingModuleSectionModel model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> GenerateTask(CreatingPathTaskModel model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> UpdateInstructorDetails(UpdateInstructorModel model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> UpdateModuleDetails(int id, UpdateModuleModel model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> UpdatePathDetails(int id, UpdatePathModel model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> UpdatePathTask(int id, UpdatePathTaskModel model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> UpdateSectionDetails(int id, UpdatingModuleSectionModel model)
+        public Task<Result> UpdateSectionDetails(int id, UpdatingModuleSectionModel model)
         {
             throw new NotImplementedException();
         }

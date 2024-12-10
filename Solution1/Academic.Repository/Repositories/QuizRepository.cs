@@ -1,5 +1,6 @@
 ﻿using Academic.Core.Abstractions;
 using Academic.Core.Entities;
+using Academic.Core.Errors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,47 +11,52 @@ using static System.Collections.Specialized.BitVector32;
 namespace Academic.Repository.Repositories
 {
     public class QuizRepository
-        (ApplicationDbContext context, IQuestionRepository questionRepository,IModuleSectionsRepository moduleSectionsRepository) 
+        (ApplicationDbContext context, IQuestionRepository questionRepository,
+        IModuleSectionsRepository moduleSectionsRepository) 
         : IQuizRepository
     {
-        public async Task<int> AddQuestionsToSectionQuizByQuizId(int quizId, params int[] questionIds)
+        public async Task<Result> AddQuestionsToSectionQuizByQuizId(int quizId, params int[] questionIds)
         {
             var quiz = await context.Quizzes
                 .Include(quiz => quiz.Questions)
-                .FirstOrDefaultAsync(q => q.Id == quizId)
-                 ?? throw new EntityNotFoundException(typeof(Quiz), quizId);
+                .FirstOrDefaultAsync(q => q.Id == quizId);
+            if(quiz == null)
+                return EntityNotFoundError.Exists(typeof(Quiz), quizId);
             foreach (var questionId in questionIds)
             {
-                var question = await questionRepository.GetQuestion(questionId)
-                    ?? throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
+                var question = await questionRepository.GetQuestion(questionId);
+                if (question == null)
+                    return EntityNotFoundError.Exists(typeof(MultiChoiceQuestion), questionId);
                 quiz.Questions.Add(question.Value);
             }
             quiz.Questions = quiz.Questions.Distinct().ToList();
-            return quiz.Questions.Count;
+            return Result.Ok();
         }
 
-        public async Task<int> AddQuestionsToSectionQuizByQuizId(int quizId, params MultiChoiceQuestion[] questions)
+        public async Task<Result> AddQuestionsToSectionQuizByQuizId(int quizId, params MultiChoiceQuestion[] questions)
         {
             var quiz = await context.Quizzes
                 .Include(quiz => quiz.Questions)
-                .FirstOrDefaultAsync(q => q.Id == quizId)
-                 ?? throw new EntityNotFoundException(typeof(Quiz), quizId);
+                .FirstOrDefaultAsync(q => q.Id == quizId);
+            if (quiz == null)
+                return EntityNotFoundError.Exists(typeof(Quiz), quizId);
             foreach (var question in questions)
             {
                 quiz.Questions.Add(question);
             }
             quiz.Questions = quiz.Questions.Distinct().ToList();
-            return quiz.Questions.Count;
+            return Result.Ok();
         }
 
-        public async Task<int> AddQuestionsToSectionQuizBySectionId(int sectionId, params int[] questionIds)
+        public async Task<Result> AddQuestionsToSectionQuizBySectionId(int sectionId, params int[] questionIds)
         {
-            var section = await moduleSectionsRepository.GetModuleSectionById(sectionId)
-                ?? throw new EntityNotFoundException(typeof(ModuleSection), sectionId);
+            var section = await moduleSectionsRepository.GetModuleSectionById(sectionId);
+            if (section == null)
+                return EntityNotFoundError.Exists(typeof(ModuleSection), sectionId);
             return await AddQuestionsToSectionQuizByQuizId(section.QuizId, questionIds);
         }
 
-        public async Task<int> AddQuestionsToSectionQuizBySectionId(int sectionId, params MultiChoiceQuestion[] questions)
+        public async Task<Result> AddQuestionsToSectionQuizBySectionId(int sectionId, params MultiChoiceQuestion[] questions)
         {
             var section = await moduleSectionsRepository.GetModuleSectionById(sectionId)
                 ?? throw new EntityNotFoundException(typeof(ModuleSection), sectionId);
@@ -65,11 +71,12 @@ namespace Academic.Repository.Repositories
             return quiz;
         }
 
-        public async Task<int> GenerateNewQuizToSection(Quiz quiz)
+        public async Task<Result> GenerateNewQuizToSection(Quiz quiz)
         {
-            ArgumentNullException.ThrowIfNull(quiz, nameof(quiz));
+            if (quiz is null)
+                return BadRequestError.Exists(typeof(Quiz));
             await context.Quizzes.AddAsync(quiz);
-            return quiz.Id;
+            return Result.Ok();
         }
 
         public async Task<Quiz?> GetQuizById(int quizId)
@@ -82,42 +89,63 @@ namespace Academic.Repository.Repositories
             return await context.Quizzes.AsNoTracking().FirstOrDefaultAsync(q => q.SectionId == sectionId);
         }
 
-        public async Task<int> RemoveQuestionsFromSectionQuizByQuizId(int quizId, params int[] questionIds)
+        public async Task<Quiz?> GetQuizWithQuestionsById(int quizId)
+        {
+            var quiz = await context.Quizzes.Include(q=>q.Questions)
+                .AsNoTracking().FirstOrDefaultAsync(q => q.Id == quizId);
+            return quiz;
+        }
+
+        public async Task<Quiz?> GetQuizWithQuestionsBySectionId(int sectionId)
+        {
+            var quiz = await context.Quizzes.Include(q => q.Questions)
+                .AsNoTracking().FirstOrDefaultAsync(q => q.SectionId == sectionId);
+            return quiz;
+        }
+
+        public async Task<Result> RemoveQuestionsFromSectionQuizByQuizId(int quizId, params int[] questionIds)
         {
             var quiz = await context.Quizzes
                .Include(quiz => quiz.Questions)
-               .FirstOrDefaultAsync(q => q.Id == quizId)
-                ?? throw new EntityNotFoundException(typeof(Quiz), quizId);
+               .FirstOrDefaultAsync(q => q.Id == quizId);
+            if (quiz is null)
+                return EntityNotFoundError.Exists(typeof(Quiz), quizId);
             foreach (var questionId in questionIds)
             {
-                var question = await questionRepository.GetQuestion(questionId)
-                     ?? throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
+                var question = await questionRepository.GetQuestion(questionId);
+                if (question is null)
+                    return EntityNotFoundError.Exists(typeof(MultiChoiceQuestion), questionId);
                 quiz.Questions.Remove(question.Value);
             }
-            return quiz.Questions.Count;
+            return Result.Ok();
         }
 
-        public async Task<int> RemoveQuestionsFromSectionQuizBySectionId(int sectionId, params int[] questionIds)
+        public async Task<Result> RemoveQuestionsFromSectionQuizBySectionId(int sectionId, params int[] questionIds)
         {
             var quiz = await context.Quizzes
               .Include(quiz => quiz.Questions)
-              .FirstOrDefaultAsync(q => q.SectionId == sectionId)
-               ?? throw new EntityNotFoundException(typeof(Quiz), sectionId);
+              .FirstOrDefaultAsync(q => q.SectionId == sectionId);
+            if (quiz is null)
+                return EntityNotFoundError.Exists(typeof(Quiz), sectionId);
             foreach (var questionId in questionIds)
             {
-                var question = await questionRepository.GetQuestion(questionId)
-                     ?? throw new EntityNotFoundException(typeof(MultiChoiceQuestion), questionId);
+                var question = await questionRepository.GetQuestion(questionId);
+                if (question is null)
+                    return EntityNotFoundError.Exists(typeof(MultiChoiceQuestion), questionId);
                 quiz.Questions.Remove(question.Value);
             }
-            return quiz.Questions.Count;
+            return Result.Ok();
         }
 
-        public async Task<int> UpdateQuizToSection(Quiz quiz)
+        public async Task<Result> UpdateQuizToSection(Quiz quiz)
         {
-            return await context.Quizzes.Where(q => q.Id == quiz.Id)
+            if (quiz is null)
+                return BadRequestError.Exists(typeof(Quiz));
+            await context.Quizzes.Where(q => q.Id == quiz.Id)
                 .ExecuteUpdateAsync(ques =>
                 ques.SetProperty(q => q.Title, quiz.Title)
                 );
+            return Result.Ok();
         }
     }
 }

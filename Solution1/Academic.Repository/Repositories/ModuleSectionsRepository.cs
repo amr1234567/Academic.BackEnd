@@ -1,5 +1,6 @@
 ﻿using Academic.Core.Abstractions;
 using Academic.Core.Entities;
+using Academic.Core.Errors;
 using Academic.Repository.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -19,12 +20,14 @@ namespace Academic.Repository.Repositories
             this._context = context;
         }
 
-        public async Task<int> GenerateNewModuleSectionInModule(ModuleSection moduleSection)
+        public async Task<Result> GenerateNewModuleSectionInModule(ModuleSection moduleSection)
         {
+            if (moduleSection == null)
+                return BadRequestError.Exists<ModuleSection>();
             await _context.ModuleSections.AddAsync(moduleSection);
-            return await _context.SaveChangesAsync();
+            return Result.Ok();
         }
-        public async Task<ModuleSection> DeleteModuleSection(int moduleSectionId)
+        public async Task<Result> DeleteModuleSection(int moduleSectionId)
         {
             var module = await _context.Modules.FindAsync(moduleSectionId);
 
@@ -32,10 +35,10 @@ namespace Academic.Repository.Repositories
             { 
                 // Remove 
                 _context.Modules.Remove(module);
-                await _context.SaveChangesAsync();
+                return Result.Ok();
             }
 
-            return null;
+            return EntityNotFoundError.Exists<ModuleSection>(moduleSectionId);
         }
 
         public async Task<ModuleSection> GetModuleSectionById(int moduleSectionId)
@@ -73,7 +76,7 @@ namespace Academic.Repository.Repositories
                 .CountAsync();
         }
 
-        public async Task<ModuleSection> UpdateModuleSection(ModuleSection moduleSection)
+        public async Task<Result> UpdateModuleSection(ModuleSection moduleSection)
         {
             var newModuleSectionData = await _context.ModuleSections.FindAsync(moduleSection.Id);
 
@@ -84,13 +87,12 @@ namespace Academic.Repository.Repositories
                 newModuleSectionData.QuizId = moduleSection.QuizId;
                 newModuleSectionData.ModuleId = moduleSection.ModuleId;
 
-                 
+
                 _context.ModuleSections.Update(newModuleSectionData);
-                await _context.SaveChangesAsync();
-                return newModuleSectionData; 
+                return Result.Ok();
             }
 
-            return null;
+            return EntityNotFoundError.Exists<ModuleSection>(moduleSection.Id);
         }
     }
 }

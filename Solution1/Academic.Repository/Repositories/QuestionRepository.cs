@@ -30,7 +30,7 @@ namespace Academic.Repository.Repositories
                 .Include(q=>q.UsersAnswers)
                 .FirstOrDefaultAsync(q => q.Id == questionId);
             if (question == null)
-                return EntityNotFoundError.Exist(typeof(MultiChoiceQuestion), questionId);
+                return EntityNotFoundError.Exists(typeof(MultiChoiceQuestion), questionId);
             return Result.Ok(question);
         }
 
@@ -39,7 +39,7 @@ namespace Academic.Repository.Repositories
             var question = await context.MultiChoiceQuestions.AsNoTracking()
                     .FirstOrDefaultAsync(q => q.Id == questionId);
             return question is null ?
-                Result.Fail(EntityNotFoundError.Exist(typeof(MultiChoiceQuestion), questionId)) :
+                Result.Fail(EntityNotFoundError.Exists(typeof(MultiChoiceQuestion), questionId)) :
                 question.ToResult();
         }
 

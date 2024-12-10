@@ -1,5 +1,6 @@
 ﻿using Academic.Core.Base;
 using Academic.Services.Models.Outputs;
+using FluentResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,8 @@ namespace Academic.Services.Abstractions
 {
     public interface IIdentityUserServices
     {
-        Task<UserDto> GetUserData(int userId);
-        Task<TokenModel> SignIn(string email, string password);
-        Task<int> SignOut(string email);
+        Task<Result<UserDto>> GetUserData(int userId);
+        Task<Result<TokenModel>> SignIn(string email, string password);
+        Task<Result> SignOut(string email);
     }
 }

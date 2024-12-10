@@ -1,4 +1,5 @@
 ﻿using Academic.Core.Entities;
+using FluentResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,9 @@ namespace Academic.Core.Abstractions
 {
     public interface IPathRepository
     {
-        Task<int> GenerateNewPath(EducationalPath path);
-        Task<EducationalPath> DeletePath(int pathId);
-        Task<EducationalPath> UpdatePath(EducationalPath path);
+        Task<Result> GenerateNewPath(EducationalPath path);
+        Task<Result> DeletePath(int pathId);
+        Task<Result> UpdatePath(EducationalPath path);
       
         Task<EducationalPath> GetPath(int pathId);
         Task<List<EducationalPath>> GetPaths(int page = 1, int size = 15);
