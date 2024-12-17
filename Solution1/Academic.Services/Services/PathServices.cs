@@ -1,16 +1,5 @@
-﻿using Academic.Core.Abstractions;
-using Academic.Core.Entities;
-using Academic.Core.Exceptions;
-using Academic.Repository.Repositories;
-using Academic.Services.Abstractions;
+﻿using Academic.Core.Entities;
 using Academic.Services.Models.Inputs;
-using Academic.Services.Models.Outputs;
-using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Academic.Services.Services
 {

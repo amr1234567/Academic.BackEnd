@@ -1,5 +1,4 @@
 ﻿using Academic.Core.Helpers;
-using Academic.Services.Abstractions;
 using Academic.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
