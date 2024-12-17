@@ -10,7 +10,7 @@ namespace Academic.Services.Abstractions
 {
     public interface IAdminServices
     {
-        Task<CreatingInstructorDto> GenerateInstructor(CreateInstructorModel model);
+        Task<Result<CreatingInstructorDto>> GenerateInstructor(CreateInstructorModel model);
         Task<int> DeleteInstructor(int id);
         Task<int> BlockInstructor(int id);
         Task<InstructorDto> UpdateInstructorDetails(UpdateInstructorForAdminModel model);
@@ -20,5 +20,6 @@ namespace Academic.Services.Abstractions
         Task<int> RejectPath(int pathId);
         Task<int> AcceptModule(int moduleId);
         Task<int> RejectModule(int moduleId);
+        Task<Result> GenerateAdmin(CreateAdminModel model);
     }
 }

@@ -13,11 +13,13 @@ namespace Academic.Repository.Repositories
     public class InstructorRepository : IInstructorRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly IUserIdentityRepository userIdentityRepository;
 
         // DI
-        public InstructorRepository(ApplicationDbContext context)
+        public InstructorRepository(ApplicationDbContext context, IUserIdentityRepository userIdentityRepository)
         {
             this._context = context;
+            this.userIdentityRepository = userIdentityRepository;
         }
 
         public async Task<int> GenerateNewInstructor(Instructor instructor)
@@ -79,20 +81,16 @@ namespace Academic.Repository.Repositories
 
         public async Task<Instructor> UpdateInstructorDetails(Instructor instructor)
         {
-             var newInstructorData = await _context.Instructors.FindAsync(instructor.Id);
+             var newInstructorData = await _context.Instructors.FirstOrDefaultAsync(i=> i.Id == instructor.Id);
 
             if(newInstructorData != null)
             {
-                newInstructorData.UserName = instructor.UserName;
-                newInstructorData.Email = instructor.Email;
-                newInstructorData.Phone = instructor.Phone;
+                await userIdentityRepository.UpdateUser(instructor);
                 newInstructorData.HashedPassword = instructor.HashedPassword;
-                newInstructorData.JobType = instructor.JobType;
                 newInstructorData.Title = instructor.Title;
+                newInstructorData.PasswordIsSet = instructor.PasswordIsSet;
+                newInstructorData.ConfirmationToken = instructor.ConfirmationToken;
                     
-                _context.Instructors.Update(newInstructorData);
-                await _context.SaveChangesAsync();
-
                 return newInstructorData;
             }
 

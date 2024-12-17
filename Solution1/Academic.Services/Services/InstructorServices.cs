@@ -1,5 +1,8 @@
 ﻿using Academic.Core.Entities;
+using Academic.Core.Identitiy;
+using Academic.Services.Errors;
 using Academic.Services.Models.Inputs;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace Academic.Services.Services
@@ -7,7 +10,9 @@ namespace Academic.Services.Services
     public class InstructorServices
         (IQuestionRepository questionRepository, IModuleSectionsRepository sectionsRepository,
         IPathTasksRepository pathTasksRepository, IModuleRepository moduleRepository,
-        IPathRepository pathRepository, IUnitOfWork unitOfWork, IQuizRepository quizRepository,IMapper mapper)
+        IPathRepository pathRepository, IUnitOfWork unitOfWork, IQuizRepository quizRepository,IMapper mapper,
+        IInstructorRepository instructorRepository, IUserIdentityRepository userRepository,
+        AccountServicesHelpers accountServices)
         : IInstructorsServices
     {
         public async Task<Result> AddExistingQuestionToSection(int quizId, int questionId)
@@ -202,6 +207,25 @@ namespace Academic.Services.Services
         public Task<Result> UpdateSectionDetails(int id, UpdatingModuleSectionModel model)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<Result> CreateNewInstructor(ConfirmAccountFromInstructorModel model)
+        {
+            var account = await userRepository.GetByEmail(model.Email);
+            if (account == null)
+                return EntityNotFoundError.Exists(typeof(Instructor), model.Email);
+            var instructor = (Instructor)account;
+            if (instructor.ConfirmationToken != model.Token)
+                return UnauthorizedError.Exists(model.Email);
+
+            var salt = accountServices.CreateSalt();
+            var password = accountServices.HashPasswordWithSalt(salt, model.Password);
+            instructor.Password = password;
+            instructor.Salt = salt;
+            instructor.PasswordIsSet = true;
+            await instructorRepository.UpdateInstructorDetails(instructor);
+            await unitOfWork.SaveChangesAsync();
+            return Result.Ok();
         }
     }
 }

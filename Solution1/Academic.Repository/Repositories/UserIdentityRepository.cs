@@ -55,6 +55,7 @@ namespace Academic.Repository.Repositories
             .SetProperty(p => p.UserName, identity.UserName)
             .SetProperty(p => p.Role, identity.Role)
             .SetProperty(p => p.Phone, identity.Phone)
+            .SetProperty(p => p.Salt, identity.Salt)
             );
             return identity;
         }

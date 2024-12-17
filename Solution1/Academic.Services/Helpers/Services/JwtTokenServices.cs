@@ -2,8 +2,8 @@
 using Academic.Core.Exceptions;
 using Academic.Core.Helpers;
 using Academic.Core.Identitiy;
-using Academic.Services.Abstractions;
 using Academic.Services.Errors;
+using Academic.Services.Helpers.Abstractions;
 using Academic.Services.Models.Outputs;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -12,11 +12,11 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Academic.Services.Services
+namespace Academic.Services.Helpers.Services
 {
-    public class TokenServices(
+    public class JwtTokenServices(
         IOptions<JwtHelper> jwtOptions,
-        IUserIdentityRepository userRepository) : ITokenServices
+        IUserIdentityRepository userRepository) : IJwtTokenServices
     {
         private readonly JwtHelper _jwtHelper = jwtOptions.Value;
 

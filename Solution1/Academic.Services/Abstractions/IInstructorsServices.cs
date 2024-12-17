@@ -10,6 +10,8 @@ namespace Academic.Services.Abstractions
 {
     public interface IInstructorsServices
     {
+        Task<Result> CreateNewInstructor(ConfirmAccountFromInstructorModel model);
+
         Task<Result> CreatePath(CreatingPathModel model);
         Task<Result> DeletePath(int pathId);
         Task<Result> UpdatePathDetails(int id, UpdatePathModel model);

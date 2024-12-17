@@ -1,4 +1,6 @@
 ﻿using Academic.Core.Helpers;
+using Academic.Services.Helpers.Abstractions;
+using Academic.Services.Helpers.Services;
 using Academic.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -21,13 +23,19 @@ namespace Academic.Services
             services.AddScoped<IPathServices, PathServices>();
             services.AddScoped<IModuleServices, ModuleServices>();
             services.AddScoped<IIdentityUserServices, IdentityUserServices>();
-            services.AddScoped<ITokenServices, TokenServices>();
 
+            services.AddScoped<IJwtTokenServices, JwtTokenServices>();
+            services.AddSingleton<IIdentityTokenService, IdentityTokenService>();
             services.AddSingleton<AccountServicesHelpers>();
+
             var jwtConfig = new JwtHelper();
             configuration.GetSection("Jwt").Bind(jwtConfig);
 
             services.AddAuthServices(jwtConfig);
+
+            services.Configure<TokenHelperConfigurations>(configuration.GetSection(nameof(TokenHelperConfigurations)));
+            services.Configure<AppDetailsHelper>(configuration.GetSection("AppDetails"));
+            services.Configure<JwtHelper>(configuration.GetSection("Jwt"));
 
             services.AddAutoMapper((c) => { });
 

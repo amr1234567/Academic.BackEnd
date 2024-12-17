@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,17 +19,25 @@ namespace Academic.Core.Base
         [EmailAddress]
         public string Email { get; set; }
 
-        [Required]
-        public string Password { get; set; }
-        public string Salt { get; set; }
+        [AllowNull]
+        [DataType(DataType.Password)]
+        public string? Password { get; set; }
+        
+        [AllowNull]
+        public string? Salt { get; set; }
 
-        [Required]
+        [AllowNull]
         [Phone]
         public string Phone { get; set; }
+
+        [Required]
         public ApplicationRole Role { get; set; }
 
+        [AllowNull]
         public string? RefreshToken { get; set; }
-        
+
+        [AllowNull]
+        [DataType(DataType.DateTime)]
         public DateTime? RefreshTokenExpiredAt { get; set; }
 
         public bool IsUserLoggedIn => !string.IsNullOrWhiteSpace(RefreshToken) && RefreshTokenExpiredAt > DateTime.UtcNow;

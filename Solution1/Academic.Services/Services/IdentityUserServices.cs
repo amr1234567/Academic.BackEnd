@@ -1,10 +1,11 @@
 ﻿
+using Academic.Services.Helpers.Abstractions;
 using System.Security.Claims;
 
 namespace Academic.Services.Services
 {
     public class IdentityUserServices
-        (ITokenServices tokenServices, IUnitOfWork unitOfWork,
+        (IJwtTokenServices tokenServices, IUnitOfWork unitOfWork,
         IUserIdentityRepository userIdentityRepository, IMapper mapper,
         AccountServicesHelpers accountServices)
         : IIdentityUserServices

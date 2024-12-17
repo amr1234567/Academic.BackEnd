@@ -1,8 +1,13 @@
 ﻿
 
 using Academic.Core.Entities;
+using Academic.Core.Helpers;
 using Academic.Core.Identitiy;
+using Academic.Services.Errors;
+using Academic.Services.Helpers.Abstractions;
 using Academic.Services.Models.Inputs;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Options;
 using System.IO;
 
 namespace Academic.Services.Services
@@ -13,9 +18,13 @@ namespace Academic.Services.Services
         IUserIdentityRepository userIdentityRepository,
         IMapper mapper,
         IPathRepository pathRepository,
-        IInstructorRepository instructorRepository)
+        IInstructorRepository instructorRepository,
+        IIdentityTokenService tokenService,
+        IOptions<AppDetailsHelper> options,
+        IEmailSender emailSender)
         : IAdminServices
     {
+        private readonly AppDetailsHelper _appDetails = options.Value;
         public async Task<int> AcceptModule(int moduleId)
         {
             var module = await moduleRepository.GetModule(moduleId);
@@ -52,15 +61,42 @@ namespace Academic.Services.Services
             return id;
         }
 
-        public async Task<CreatingInstructorDto> GenerateInstructor(CreateInstructorModel model)
+        public Task<Result> GenerateAdmin(CreateAdminModel model)
         {
-            var instructor = mapper.Map<Instructor>(model);
-            var id = await instructorRepository.GenerateNewInstructor(instructor);
-            await unitOfWork.SaveChangesAsync();
-            return new CreatingInstructorDto(id);
+            throw new NotImplementedException();
         }
 
-        // TODO 
+        /// <summary>
+        /// TODO 
+        /// create new instructor
+        /// </summary>
+        /// <param name="model">password and email</param>
+        /// <returns>details of new instructor</returns>
+        public async Task<Result> GenerateInstructor(CreateInstructorModel model)
+        {
+
+            var checkUser = await userIdentityRepository.GetByEmail(model.Email);
+            if (checkUser != null)
+                return new EmailAlreadyExistError(model.Email);
+
+            var instructor = mapper.Map<Instructor>(model);
+            instructor.Role = Core.Enums.ApplicationRole.Instructor;
+
+            var newToken = tokenService.GenerateEmailConfirmationToken(model.Email);
+            instructor.ConfirmationToken = newToken;
+
+            await instructorRepository.GenerateNewInstructor(instructor);
+
+            var uri = $"{_appDetails.FrontEndLink}/{_appDetails.ConfirmEmailEndPointForInstructor}?" +
+                $"email={model.Email}&token={newToken}";
+            var emailBody = $"Please confirm your account by clicking this link: <br> <b>{uri}</b>";
+            await emailSender.SendEmailAsync(model.Email, "Confirm Email", emailBody);
+           
+            await unitOfWork.SaveChangesAsync();
+
+            return Result.Ok();
+        }
+
         public async Task<List<PathDto>> GetAllPathsNeverGotResponse(int page = 1, int size = 10)
         {
             var paths = await pathRepository.GetPathsWithModulesAndInstructorWithCriteria(p => !p.IsAccepted == null, page, size);
@@ -122,5 +158,9 @@ namespace Academic.Services.Services
             return mapper.Map<InstructorDto>(instructor);
         }
 
+        Task<Result<CreatingInstructorDto>> IAdminServices.GenerateInstructor(CreateInstructorModel model)
+        {
+            throw new NotImplementedException();
+        }
     } 
 }

@@ -1,5 +1,8 @@
-﻿using Academic.Repository.Data;
+﻿using Academic.Core.Helpers;
+using Academic.Repository.Data;
+using Academic.Repository.OutsideServices;
 using Academic.Repository.Repositories;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +26,8 @@ namespace Academic.Repository
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             });
 
+            services.Configure<EmailConfigurationsHelper>(configuration.GetSection("EmailServiceSettings"));
+
 
             services.AddScoped<IQuestionRepository, QuestionRepository>();
             services.AddScoped<IQuizRepository, QuizRepository>();
@@ -34,6 +39,8 @@ namespace Academic.Repository
             services.AddScoped<IModuleRepository, ModuleRepository>();
             services.AddScoped<IPathRepository, PathRepository>();
             services.AddScoped<IPathTasksRepository, PathTasksRepository>();
+
+            services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
