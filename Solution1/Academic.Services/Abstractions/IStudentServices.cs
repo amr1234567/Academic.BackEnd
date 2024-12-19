@@ -1,7 +1,5 @@
 ﻿using Academic.Core.Entities;
 using Academic.Core.Identitiy;
-using Academic.Services.Models.Inputs;
-using Academic.Services.Models.Outputs;
 using FluentResults;
 using System;
 using System.Collections.Generic;
@@ -13,15 +11,15 @@ namespace Academic.Services.Abstractions
 {
     public interface IStudentServices
     {
-        Task<int> SignUp(SignUpModel model);
-        Task<int> RollInPath(int pathId, int userId);
-        Task<int> RollInModule(int moduleId, int userId);
-        Task<Result> SolveQuestion(UserQuestionAnswerModel model);
-        Task<int> GetCertifications(int userId, int page = 1, int size = 10);
-        Task<List<UserDto>> GetTopInScore(int num);
-        Task<int> SolveTask(SolveTaskModel model);
-        Task<List<PathDto>> GetAllPathsForStudent(int userId, int page = 1, int size = 10);
-        Task<List<ModuleDto>> GetAllModulesForStudent(int userId, int page = 1, int size = 10);
-        Task<double> GetProgressInPath(int userId, int pathId);
+        Task<Result> SignUp(SignUpModel model);
+        Task<Result> RollInPath(int pathId, int userId);
+        Task<Result> RollInModule(int moduleId, int userId);
+        Task<Result<double>> SolveQuestion(UserQuestionAnswerModel model);
+        Task<Result<List<CertificationDto>>> GetCertifications(int userId, int page = 1, int size = 10);
+        Task<Result<List<UserDto>>> GetTopInScore(int num);
+        Task<Result<SolvingTaskDto>> SolveTask(SolveTaskModel model);
+        Task<Result<List<PathDto>>> GetAllPathsForStudent(int userId, int page = 1, int size = 10);
+        Task<Result<List<ModuleDto>>> GetAllModulesForStudent(int userId, int page = 1, int size = 10);
+        Task<Result<double>> GetProgressInPath(int userId, int pathId);
     }
 }

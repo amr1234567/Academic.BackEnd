@@ -1,4 +1,5 @@
 ﻿using Academic.Core.Base;
+using FluentResults;
 
 namespace Academic.Core.Abstractions
 {  
@@ -10,5 +11,6 @@ namespace Academic.Core.Abstractions
         Task<IdentityUser> UpdateUser(IdentityUser identity);
         Task<int> UpdateAllWithFunc(Action<IdentityUser> action);
         Task<IdentityUser?> GetUserByCriteria(Func<IdentityUser, bool> criteria);
+        Task<Result> CreateUser(IdentityUser user);
     }
 }

@@ -21,5 +21,7 @@ namespace Academic.Core.Entities.ManyToManyEntities
         [Range(0, 200)]
         public double Score { get; set; }
 
+        public List<UserQuestionAnswer> Answers { get; set; }
     }
+
 }

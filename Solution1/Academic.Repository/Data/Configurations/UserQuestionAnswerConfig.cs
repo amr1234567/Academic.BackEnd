@@ -24,7 +24,14 @@ namespace Academic.Repository.Data.Configurations
             builder
                 .HasOne(uqa => uqa.Quiz)
                 .WithMany()
-                .HasForeignKey(uqa => uqa.QuizId);
+                .HasForeignKey(uqa => uqa.QuizId)
+                .IsRequired(false);
+
+            builder
+                .HasOne(uqa => uqa.PathTask)
+                .WithMany()
+                .HasForeignKey(uqa => uqa.PathTaskId)
+                .IsRequired(false);
 
             builder
                 .HasOne(uqa => uqa.Question)

@@ -13,11 +13,13 @@ namespace Academic.Core.Entities
 {
     public class PathTask : BaseEntity
     {
-
+        [Required]
+        [MinLength(10)]
+        public string Title { get; set; }
         [Range(1, 200)]
         public double TotalPoints { get; set; }
         [Range(1, 140)]
-        public double MinPointsToCertify { get; set; }
+        public double MinPercentagesToCertify { get; set; }
         [Required] 
         [MaxLength(200)]
         public string Description { get; set; }

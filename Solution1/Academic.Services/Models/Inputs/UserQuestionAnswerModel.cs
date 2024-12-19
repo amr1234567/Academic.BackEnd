@@ -1,4 +1,4 @@
-﻿namespace Academic.Services.Models.Outputs
+﻿namespace Academic.Services.Models.Inputs
 {
     public class UserQuestionAnswerModel
     {

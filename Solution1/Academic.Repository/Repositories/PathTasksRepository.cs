@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
 using Academic.Core.Errors;
+using Academic.Core.Identitiy;
+using Academic.Core.Entities.ManyToManyEntities;
 
 namespace Academic.Repository.Repositories
 {
@@ -20,49 +22,55 @@ namespace Academic.Repository.Repositories
         }
 
         
-        public async Task<PathTask> GenerateTaskForPath(PathTask path)
+        public async Task<Result> GenerateTaskForPath(PathTask path)
         {
+            var checkPath = await GetTaskForPathByPathId(path.PathId);
+            if (checkPath != null)
+                return EntityExistsError.Exists<PathTask>();
             await _context.PathTasks.AddAsync(path);
-             
-            return path;
+
+            return Result.Ok();
         }
 
-        public async Task<PathTask> UpdateTask(PathTask path)
+        public async Task<Result> UpdateTask(PathTask path)
         {
+            if (path == null)
+                return Result.Fail(new Error("Argument can't be null"));
             _context.PathTasks.Update(path);
-             
-            return path;
+
+            return Result.Ok();
         }
 
-        public async Task<PathTask> DeleteTask(int pathId)
+        public async Task<Result> DeleteTask(int pathId)
         {
             var task = await _context.PathTasks.FirstOrDefaultAsync(t => t.PathId == pathId);
-
+            if (task == null)
+                return EntityNotFoundError.Exists<PathTask>(pathId);
             _context.PathTasks.Remove(task);
-             
-            return task;
+
+            return Result.Ok();
         }
 
-        public async Task<PathTask> GetTaskForPathByPathId(int pathId)
+        public async Task<Result<PathTask>> GetTaskForPathByPathId(int pathId)
         {
-            var task = await _context.PathTasks
-                .FirstOrDefaultAsync(t => t.PathId == pathId);
+            var task = await _context.PathTasks.AsNoTracking().Where(t => t.PathId == pathId).Include(p => p.Questions)
+                .FirstOrDefaultAsync();
 
             if(task != null)
                 return task;
 
-            return null;
+            return EntityNotFoundError.Exists<PathTask>(pathId);
         }
 
-        public async Task<PathTask> GetTaskForPathById(int taskId)
+        public async Task<Result<PathTask>> GetTaskForPathById(int taskId)
         {
-            var task = await _context.PathTasks
-                .FirstOrDefaultAsync(t => t.PathId == taskId);
+            var task = await _context.PathTasks.AsNoTracking().Where(t => t.PathId == taskId).Include(p => p.Questions)
+                .FirstOrDefaultAsync();
 
             if (task != null)
                 return task;
 
-            return null;
+            return EntityNotFoundError.Exists<PathTask>(taskId);
         }
 
         public async Task<List<PathTask>> GetPathTasks(int page = 1, int size = 10)
@@ -142,6 +150,26 @@ namespace Academic.Repository.Repositories
             foreach (var question in questions)
                 task.Questions.Remove(question);
 
+            return Result.Ok();
+        }
+
+        public async Task<Result<List<PathTaskUsers>>> GetPathTasksCompletedForUser(int userId, int page, int size)
+        {
+            var pathTasks = await _context.PathTaskUsers.Where(u => u.UserId == userId)
+                .Include(p => p.PathTask).Take((page - 1) * size).Take(size).ToListAsync();
+            if (pathTasks == null)
+                return EntityNotFoundError.Exists<PathTaskUsers>("");
+
+            return pathTasks;
+        }
+
+        public async Task<Result> SolveTask(PathTaskUsers userTask)
+        {
+            ArgumentNullException.ThrowIfNull(nameof(userTask));
+            var checkUserWithTask = await _context.PathTaskUsers.AsNoTracking().FirstOrDefaultAsync(p => p.PathTaskId == userTask.PathTaskId && p.UserId == userTask.UserId);
+            if (checkUserWithTask != null)
+                return EntityExistsError.Exists<PathTaskUsers>();
+            await _context.PathTaskUsers.AddAsync(userTask);
             return Result.Ok();
         }
     }

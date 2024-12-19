@@ -1,14 +1,5 @@
-﻿
-
-using Academic.Core.Entities;
-using Academic.Core.Helpers;
-using Academic.Core.Identitiy;
-using Academic.Services.Errors;
-using Academic.Services.Helpers.Abstractions;
-using Academic.Services.Models.Inputs;
-using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
-using System.IO;
 
 namespace Academic.Services.Services
 {
@@ -21,6 +12,7 @@ namespace Academic.Services.Services
         IInstructorRepository instructorRepository,
         IIdentityTokenService tokenService,
         IOptions<AppDetailsHelper> options,
+        AccountServicesHelpers accountServices,
         IEmailSender emailSender)
         : IAdminServices
     {
@@ -61,9 +53,27 @@ namespace Academic.Services.Services
             return id;
         }
 
-        public Task<Result> GenerateAdmin(CreateAdminModel model)
+        public async Task<Result> GenerateAdmin(CreateAdminModel model)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(nameof(model));
+            var checkUser = await userIdentityRepository.GetByEmail(model.Email);
+            if (checkUser != null)
+                return new EmailAlreadyExistError(model.Email);
+
+            var salt = accountServices.CreateSalt();
+            var admin = new Admin
+            {
+                Role = Core.Enums.ApplicationRole.Admin,
+                Email = model.Email,
+                Salt = salt,
+                HashPassword = accountServices.HashPasswordWithSalt(salt, model.Password),
+                UserName = model.UserName,
+            };
+            var result = await userIdentityRepository.CreateUser(admin);
+            if (result.IsFailed)
+                return Result.Fail(result.Errors);
+            await unitOfWork.SaveChangesAsync();
+            return result;
         }
 
         /// <summary>
@@ -74,7 +84,7 @@ namespace Academic.Services.Services
         /// <returns>details of new instructor</returns>
         public async Task<Result> GenerateInstructor(CreateInstructorModel model)
         {
-
+            ArgumentNullException.ThrowIfNull(nameof(model));
             var checkUser = await userIdentityRepository.GetByEmail(model.Email);
             if (checkUser != null)
                 return new EmailAlreadyExistError(model.Email);
@@ -156,11 +166,6 @@ namespace Academic.Services.Services
             await userIdentityRepository.UpdateUser(instructor);
             await unitOfWork.SaveChangesAsync();
             return mapper.Map<InstructorDto>(instructor);
-        }
-
-        Task<Result<CreatingInstructorDto>> IAdminServices.GenerateInstructor(CreateInstructorModel model)
-        {
-            throw new NotImplementedException();
         }
     } 
 }

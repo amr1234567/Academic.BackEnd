@@ -1,16 +1,12 @@
-﻿using Academic.Core.Entities;
-using Academic.Core.Identitiy;
-using Academic.Services.Errors;
-using Academic.Services.Models.Inputs;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace Academic.Services.Services
 {
     public class InstructorServices
         (IQuestionRepository questionRepository, IModuleSectionsRepository sectionsRepository,
         IPathTasksRepository pathTasksRepository, IModuleRepository moduleRepository,
-        IPathRepository pathRepository, IUnitOfWork unitOfWork, IQuizRepository quizRepository,IMapper mapper,
+        IPathRepository pathRepository, IUnitOfWork unitOfWork,
+        IQuizRepository quizRepository,IMapper mapper,
         IInstructorRepository instructorRepository, IUserIdentityRepository userRepository,
         AccountServicesHelpers accountServices)
         : IInstructorsServices
@@ -77,7 +73,6 @@ namespace Academic.Services.Services
             var result = await pathTasksRepository.AddQuestionsToTask(taskId, question);
             if (result.IsFailed)
                 return result;
-            await unitOfWork.SaveChangesAsync();
             return result;
         }
 
@@ -153,15 +148,11 @@ namespace Academic.Services.Services
             var result = await pathTasksRepository.RemoveQuestionsFromTask(taskId, questionId);
             if (result.IsFailed)
                 return result;
-            await unitOfWork.SaveChangesAsync();
             return result;
         }
 
         public async Task<Result> DeleteSection(int sectionId)
         {
-            var section = await sectionsRepository.GetModuleSectionById(sectionId);
-            if (section == null)
-                return BadRequestError.Exists<ModuleSection>();
             var result = await sectionsRepository.DeleteModuleSection(sectionId);
             if (result.IsFailed)
                 return result;
@@ -169,44 +160,184 @@ namespace Academic.Services.Services
             return result;
         }
 
-        public Task<Result> DeleteTask(int taskId)
+        public async Task<Result> DeleteTask(int taskId)
         {
-            throw new NotImplementedException();
+            var task = await pathTasksRepository.DeleteTask(taskId);
+            if(task.IsFailed)
+                return task;
+            await unitOfWork.SaveChangesAsync();
+            return task;
         }
 
-        public Task<Result> GenerateSection(CreatingModuleSectionModel model)
+        public async Task<Result> GenerateSection(CreatingModuleSectionModel model)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(nameof(model));
+            var section = new ModuleSection
+            {
+                Body = model.Body,
+                ModuleId = model.ModuleId,
+                Title = model.Title,
+                Quiz = new Quiz(),
+            };
+            var sectionResult = await sectionsRepository.GenerateNewModuleSectionInModule(section);
+            if (sectionResult.IsFailed)
+                return sectionResult;
+            await unitOfWork.SaveChangesAsync();
+            return sectionResult;
         }
 
-        public Task<Result> GenerateTask(CreatingPathTaskModel model)
+        public async Task<Result> GenerateTask(CreatingPathTaskModel model)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(nameof(model));
+            var newTask = new PathTask
+            {
+                Description = model.Description,
+                PathId = model.PathId,
+                Title = model.Title,
+                MinPercentagesToCertify = model.MinPercentagesToCertify,
+            };
+            foreach(var questiondDto in model.Questions)
+            {
+                var question = new MultiChoiceQuestion
+                {
+                    Answer = questiondDto.Answer,
+                    ChoiceA = questiondDto.ChoiceA,
+                    ChoiceB = questiondDto.ChoiceB,
+                    ChoiceC = questiondDto.ChoiceC,
+                    ChoiceD = questiondDto.ChoiceD,
+                    Content = questiondDto.Content,
+                    InstructorId = questiondDto.InstructorId,
+                    Points = questiondDto.Points,
+                };
+                var result = await questionRepository.GenerateNewQuestion(question);
+                if (result.IsFailed) return result;
+            }
+            newTask.TotalPoints = model.Questions.Sum(q => q.Points);
+            var pathTaskResult = await pathTasksRepository.GenerateTaskForPath(newTask);
+            if (pathTaskResult.IsFailed)
+                return pathTaskResult;
+            await unitOfWork.SaveChangesAsync();
+            return pathTaskResult;
         }
 
-        public Task<Result> UpdateInstructorDetails(UpdateInstructorModel model)
+        //public Task<Result> UpdateInstructorDetails(UpdateInstructorModel model)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        public async Task<Result> UpdateModuleDetails(int id, UpdateModuleModel model)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(nameof(id));
+            var moduleResult = await moduleRepository.GetModule(id);
+            if (moduleResult is null)
+                return EntityNotFoundError.Exists<Module>(id);
+            moduleResult.Difficulty = model.Difficulty is null ? moduleResult.Difficulty : (double)model.Difficulty;
+            moduleResult.Description = model.Description is null ? moduleResult.Description : model.Description;
+            moduleResult.Title = model.Title is null ? moduleResult.Title : model.Title;
+
+            var updateResult = await moduleRepository.UpdateModule(moduleResult);
+            if (updateResult.IsFailed)
+                return updateResult;
+            await unitOfWork.SaveChangesAsync();
+            return updateResult;
         }
 
-        public Task<Result> UpdateModuleDetails(int id, UpdateModuleModel model)
+        public async Task<Result> UpdatePathDetails(int id, UpdatePathModel model)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(nameof(model));
+            var path = await pathRepository.GetPath(id);
+            if (path is null)
+                return EntityNotFoundError.Exists<EducationalPath>(id);
+            path.Difficulty = model.Difficulty is null ? path.Difficulty : (double)model.Difficulty;
+            path.Description = model.Description is null ? path.Description : model.Description;
+            path.Title = model.Title is null ? path.Title : model.Title;
+            path.IntroductionBody = model.IntroductionBody is null ? path.IntroductionBody : model.IntroductionBody;
+
+            var updateResult = await pathRepository.UpdatePath(path);
+            if (updateResult.IsFailed)
+                return updateResult;
+            await unitOfWork.SaveChangesAsync();
+            return updateResult;
         }
 
-        public Task<Result> UpdatePathDetails(int id, UpdatePathModel model)
+        public async Task<Result> UpdatePathTask(int id, UpdatePathTaskModel model)
         {
-            throw new NotImplementedException();
+            var pathTaskResult = await pathTasksRepository.GetTaskForPathById(id);
+            if (pathTaskResult.IsFailed)
+                return Result.Fail(pathTaskResult.Errors);
+            var pathTask = pathTaskResult.Value;
+            pathTask.Description = model.Description is null ? pathTask.Description : model.Description;
+            pathTask.Title = model.Title is null ? pathTask.Title : model.Title;
+            pathTask.MinPercentagesToCertify = model.MinPercentagesToCertify is null ? pathTask.MinPercentagesToCertify : (double)model.MinPercentagesToCertify;
+
+            var totalScore = pathTask.TotalPoints;
+            if(model.Questions is not null)
+            {
+                foreach (var questionDto in model.Questions)
+                {
+                    if(questionDto.Id is null)
+                    {
+                        if (questionDto.WantDelete)
+                        {
+                            var questionResult = await questionRepository.GetQuestion((int)questionDto.Id!);
+                            if (questionResult.IsFailed)
+                                return Result.Fail(questionResult.Errors);
+                            var result = await DeleteQuestionFromTask(id, (int)questionDto.Id);
+                            if (result.IsFailed)
+                                return Result.Fail(result.Errors);
+                            totalScore -= questionResult.Value.Points;
+                        }
+                        else
+                        {
+                            var question = mapper.Map<CreatingQuestionModel>(questionDto);
+                            var questionResult = await AddQuestionToTask(id, question);
+                            if (questionResult.IsFailed)
+                                return Result.Fail(questionResult.Errors);
+                            totalScore += question.Points;
+                        }
+                    }
+                    else
+                    {
+                        var questionResult = await questionRepository.GetQuestion((int)questionDto.Id);
+                        if (questionResult.IsFailed)
+                            return Result.Fail(questionResult.Errors);
+                        var question = questionResult.Value;
+
+                        question.Answer = questionDto.Answer is null ? question.Answer : (char)questionDto.Answer;
+                        question.Content = questionDto.Content is null ? question.Content : questionDto.Content;
+                        question.ChoiceA = questionDto.ChoiceA is null ? question.ChoiceA : questionDto.ChoiceA;
+                        question.ChoiceB = questionDto.ChoiceB is null ? question.ChoiceB : questionDto.ChoiceB;
+                        question.ChoiceC = questionDto.ChoiceC is null ? question.ChoiceC : questionDto.ChoiceC;
+                        question.ChoiceD = questionDto.ChoiceD is null ? question.ChoiceD : questionDto.ChoiceD;
+                        question.Points = questionDto.Points is null ? question.Points : (double)questionDto.Points;
+                        
+                        await questionRepository.UpdateQuestion(question);
+
+                        totalScore += question.Points;
+                    }
+                }
+            }
+            var updatingResult = await pathTasksRepository.UpdateTask(pathTask);
+            if (updatingResult.IsFailed)
+                return Result.Fail(updatingResult.Errors);
+            await unitOfWork.SaveChangesAsync();
+            return updatingResult;
         }
 
-        public Task<Result> UpdatePathTask(int id, UpdatePathTaskModel model)
+        public async Task<Result> UpdateSectionDetails(int id, UpdatingModuleSectionModel model)
         {
-            throw new NotImplementedException();
-        }
+            ArgumentNullException.ThrowIfNull(nameof(id));
+            var section = await sectionsRepository.GetModuleSectionById(id);
+            if (section is null)
+                return EntityNotFoundError.Exists<ModuleSection>(id);
+            section.Body = model.Body is null ? section.Body : model.Body;
+            section.Title = model.Title is null ? section.Title : model.Title;
 
-        public Task<Result> UpdateSectionDetails(int id, UpdatingModuleSectionModel model)
-        {
-            throw new NotImplementedException();
+            var updateResult = await sectionsRepository.UpdateModuleSection(section);
+            if (updateResult.IsFailed)
+                return updateResult;
+            await unitOfWork.SaveChangesAsync();
+            return updateResult;
         }
 
         public async Task<Result> CreateNewInstructor(ConfirmAccountFromInstructorModel model)

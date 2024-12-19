@@ -34,6 +34,6 @@ namespace Academic.Services.Abstractions
         Task<Result> AddExistingQuestionToTask(int taskId, int questionId);
         Task<Result> DeleteQuestionFromTask(int taskId, int questionId);
 
-        Task<Result> UpdateInstructorDetails(UpdateInstructorModel model);
+        //Task<Result> UpdateInstructorDetails(UpdateInstructorModel model);
     }
 }

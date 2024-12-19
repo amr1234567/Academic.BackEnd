@@ -14,10 +14,12 @@ namespace Academic.Repository.Repositories
     public class ModuleSectionsRepository : IModuleSectionsRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly IQuizRepository quizRepository;
 
-        public ModuleSectionsRepository(ApplicationDbContext context)
+        public ModuleSectionsRepository(ApplicationDbContext context, IQuizRepository quizRepository)
         {
             this._context = context;
+            this.quizRepository = quizRepository;
         }
 
         public async Task<Result> GenerateNewModuleSectionInModule(ModuleSection moduleSection)
@@ -25,6 +27,11 @@ namespace Academic.Repository.Repositories
             if (moduleSection == null)
                 return BadRequestError.Exists<ModuleSection>();
             await _context.ModuleSections.AddAsync(moduleSection);
+            var quiz = moduleSection.Quiz;
+            quiz.SectionId = moduleSection.Id;
+            var result = await quizRepository.GenerateNewQuizToSection(quiz);
+            if (result.IsFailed)
+                return result;
             return Result.Ok();
         }
         public async Task<Result> DeleteModuleSection(int moduleSectionId)

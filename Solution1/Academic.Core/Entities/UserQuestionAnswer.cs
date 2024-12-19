@@ -15,9 +15,13 @@ namespace Academic.Core.Entities
         [ForeignKey(nameof(UserId))]
         public User User { get; set; }
 
-        public int QuizId { get; set; }
+        public int? QuizId { get; set; }
         [ForeignKey(nameof(QuizId))]
-        public Quiz Quiz { get; set; }
+        public Quiz? Quiz { get; set; }
+
+        public int? PathTaskId { get; set; }
+        [ForeignKey(nameof(PathTaskId))]
+        public PathTask? PathTask { get; set; }
 
         public int QuestionId { get; set; }
         [ForeignKey(nameof(QuestionId))]

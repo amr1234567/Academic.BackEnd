@@ -17,11 +17,11 @@ namespace Academic.Repository.Repositories
 
         }
 
-        public async Task<int> GenerateNewQuestion(MultiChoiceQuestion question)
+        public async Task<Result> GenerateNewQuestion(MultiChoiceQuestion question)
         {
             ArgumentNullException.ThrowIfNull(question, nameof(question));
             await context.MultiChoiceQuestions.AddAsync(question);
-            return question.Id;
+            return Result.Ok();
         }
 
         public async Task<Result<MultiChoiceQuestion>> GetAllAnswerForQuestion(int questionId, int page = 1, int size = 30)
@@ -73,17 +73,17 @@ namespace Academic.Repository.Repositories
             return Result.Ok(questions);
         }
 
-        public async Task<Result> SolveQuestion(UserQuestionAnswer model)
+        public async Task<Result<double>> SolveQuestion(UserQuestionAnswer model)
         {
             if (model == null)
                 return BadRequestError.Exists(typeof(UserQuestionAnswer));
             var questionResult = await GetQuestion(model.QuestionId);
             if (questionResult.IsFailed)
-                return questionResult.ToResult();
+                return Result.Fail(questionResult.Errors);
             var newModel = model;
             newModel.IsCorrect = questionResult.Value.Answer == model.UserChoice;
             await context.userQuestionAnswers.AddAsync(newModel);
-            return Result.Ok();
+            return Result.Ok(newModel.IsCorrect ? questionResult.Value.Points : 0);
         }
 
         public async Task<int> UpdateQuestion(MultiChoiceQuestion question)

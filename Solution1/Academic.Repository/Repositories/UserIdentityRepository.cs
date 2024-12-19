@@ -1,5 +1,6 @@
 ﻿using Academic.Core.Abstractions;
 using Academic.Core.Base;
+using Academic.Core.Errors;
 using Academic.Core.Identitiy;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,6 +13,16 @@ namespace Academic.Repository.Repositories
 {
     public class UserIdentityRepository(ApplicationDbContext context) : IUserIdentityRepository
     {
+        public async Task<Result> CreateUser(IdentityUser user)
+        {
+            ArgumentNullException.ThrowIfNull(user, nameof(user));
+            var checkUser = await GetByEmail(user.Email);
+            if (checkUser != null)
+                return EntityExistsError.Exists<User>();
+            await context.IdentityUsers.AddAsync(user);
+            return Result.Ok();
+        }
+
         public async Task<IdentityUser?> GetByEmail(string email)
         {
             return await context.IdentityUsers.FirstOrDefaultAsync(u => u.Email == email);
@@ -39,7 +50,7 @@ namespace Academic.Repository.Repositories
 
         public async Task<int> UpdateByCriteriaWithFunc(Func<IdentityUser, bool> criteria, Action<IdentityUser> action)
         {
-            var user = await context.IdentityUsers.FirstOrDefaultAsync(u => criteria(u));
+            var user = await context.IdentityUsers.AsNoTracking().FirstOrDefaultAsync(u => criteria(u));
             if (user == null)
                 throw new EntityNotFoundException(typeof(IdentityUser), nameof(UpdateByCriteriaWithFunc));
             action(user);

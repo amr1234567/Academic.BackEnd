@@ -71,16 +71,18 @@ namespace Academic.Repository.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<EducationalPath>> GetPathsForUser(int userId, int page = 1, int size = 15)
+        public async Task<Result<List<EducationalPath>>> GetPathsForUser(int userId, int page = 1, int size = 15)
         {
             if (page <= 0) page = 1;
             if (size <= 0) size = 15;
 
-            return await _context.Paths
+            var paths = await _context.Paths
                 .Where(p => p.Id == userId)
                 .Skip((page - 1) * size)
                 .Take(size)
                 .ToListAsync();
+
+            return paths;
         }
 
         public async Task<Result> UpdatePath(EducationalPath path)

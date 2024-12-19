@@ -23,7 +23,7 @@ namespace Academic.Repository.OutsideServices
             emailMessage.To.Add(new MailboxAddress(email.Split("@")[0], email));
             emailMessage.Subject = subject;
 
-            emailMessage.Body = new TextPart("plain") { Text = message };
+            emailMessage.Body = new TextPart("html") { Text = message };
 
             using var client = new SmtpClient();
             try
@@ -31,7 +31,6 @@ namespace Academic.Repository.OutsideServices
                 await client.ConnectAsync(configurations.Providor, configurations.Port, MailKit.Security.SecureSocketOptions.StartTls);
                 await client.AuthenticateAsync(configurations.Email, configurations.Password);
                 await client.SendAsync(emailMessage);
-                await client.DisconnectAsync(true);
             }
             catch (Exception ex)
             {
